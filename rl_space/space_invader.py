@@ -8,7 +8,8 @@ from dataclasses import dataclass
 
 import os
 
-# os.environ["SDL_VIDEODRIVER"] = "dummy"
+os.environ["SDL_VIDEODRIVER"] = "dummy"
+os.environ["SDL_AUDIODRIVER"] = "dummy"
 
 
 # game constants
@@ -145,6 +146,7 @@ class SpaceInvaderGame:
         self.score = 0
         self.highest_score = 0
         self.kills = 0
+        self.init_background_music()
         self.pause_sound = mixer.Sound("res/sounds/pause.wav")
         self.level_up_sound = mixer.Sound("res/sounds/1up.wav")
         self.game_over_sound = mixer.Sound("res/sounds/gameover.wav")
@@ -449,7 +451,6 @@ class SpaceInvaderGame:
                 laser_beam_sound_path,
             )
             self.lasers.append(laser_obj)
-            self.init_background_music()
 
     def step(self, action):
         reward = 0

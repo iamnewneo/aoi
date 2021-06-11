@@ -19,7 +19,7 @@ MEM_CAPACITY = 10000
 LR = 1e-3
 N_EPISODES = 40000
 MAX_STEPS = 10000
-BATCH_SIZE = 4
+BATCH_SIZE = 128
 GAMMA = 0.999
 
 EPS_START = 0.9
@@ -99,7 +99,7 @@ class NNModel(nn.Module):
         view_time = time.time()
         # print(f"View Time: {view_time - c_b_2}")
         x = self.fc(x)
-        print(f"Forward took { time.time() - start_time} sec")
+        # print(f"Forward took { time.time() - start_time} sec")
         return x
 
 
