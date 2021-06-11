@@ -449,6 +449,7 @@ class SpaceInvaderGame:
                 laser_beam_sound_path,
             )
             self.lasers.append(laser_obj)
+            self.init_background_music()
 
     def step(self, action):
         reward = 0
