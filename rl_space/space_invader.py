@@ -251,15 +251,15 @@ class SpaceInvaderGame:
             self.highest_score = self.score
 
         # console display
-        print("----------------")
-        print("GAME OVER !!")
-        print("----------------")
-        print("Level:", self.level)
-        print("Difficulty:", self.difficulty)
-        print("Your Score:", self.score)
-        print("----------------")
-        print("Try Again !!")
-        print("----------------")
+        # print("----------------")
+        # print("GAME OVER !!")
+        # print("----------------")
+        # print("Level:", self.level)
+        # print("Difficulty:", self.difficulty)
+        # print("Your Score:", self.score)
+        # print("----------------")
+        # print("Try Again !!")
+        # print("----------------")
         self.running = False
         self.gameover_screen()
 
@@ -278,9 +278,9 @@ class SpaceInvaderGame:
             ):
                 self.level_up()
             self.init_background_music()
-        print("Score:", self.score)
-        print("level:", self.level)
-        print("difficulty:", self.difficulty)
+        # print("Score:", self.score)
+        # print("level:", self.level)
+        # print("difficulty:", self.difficulty)
         enemy_obj = self.respawn(enemy_obj)
         return enemy_obj
 
@@ -291,7 +291,7 @@ class SpaceInvaderGame:
         laser_obj.y = enemy_obj.y + laser_obj.height / 2
         self.life -= 1
         new_laser = laser_obj
-        print("Life Left:", self.life)
+        # print("Life Left:", self.life)
         if self.life > 0:
             new_player = self.rebirth(player_obj)
         else:
@@ -614,13 +614,13 @@ if __name__ == "__main__":
 
     for _ in range(n_actions):
         action_taken = np.random.choice(space_game.action_list, 1, action_prob)[0]
-        print(f"Action Take: {action_taken}")
+        # print(f"Action Take: {action_taken}")
         space_game.step(action_taken)
         if space_game.life == 0:
             gameover = 1
             break
 
     if not gameover:
-        print("Game Not Over")
+        # print("Game Not Over")
         space_game.gameover()
 
