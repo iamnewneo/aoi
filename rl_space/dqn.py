@@ -221,6 +221,7 @@ def train():
     num_action = len(space_game.action_list)
     agent = SpaceInvaderDQN(height=HEIGHT, width=WIDTH, num_action=num_action)
     for ep_i in range(N_EPISODES):
+        print(f"Episode: {ep_i}")
         total_episode_reward = 0
         space_game.init_game()
         state = space_game.get_screen()
