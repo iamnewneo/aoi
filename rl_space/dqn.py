@@ -17,18 +17,19 @@ torch.set_flush_denormal(True)
 
 MEM_CAPACITY = 10000
 LR = 1e-3
-N_EPISODES = 40000
+N_EPISODES = 1000
 MAX_STEPS = 10000
-BATCH_SIZE = 128
+BATCH_SIZE = 512
 GAMMA = 0.999
+TARGET_UPDATE = 10
 
 EPS_START = 0.9
 EPS_END = 0.05
 EPS_DECAY = 200
 
 # game constants
-WIDTH = 128
-HEIGHT = 128
+WIDTH = 256
+HEIGHT = 256
 
 Transition = namedtuple("Transition", ("state", "action", "next_state", "reward"))
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -77,7 +78,7 @@ class NNModel(nn.Module):
         )
         self.bn2 = nn.BatchNorm2d(32)
 
-        linear_input_size = 492032
+        linear_input_size = 2032128
         self.linear_input_size = linear_input_size
         self.fc = nn.Linear(linear_input_size, num_action)
 
@@ -106,8 +107,12 @@ class NNModel(nn.Module):
 class SpaceInvaderDQN:
     def __init__(self, height, width, num_action) -> None:
         self.num_action = num_action
-        self.policy_net = NNModel(height, width, num_action=num_action)
-        self.target_net = NNModel(height, width, num_action=num_action)
+
+        self.policy_net = NNModel(height, width, num_action=num_action).to(device)
+        self.target_net = NNModel(height, width, num_action=num_action).to(device)
+        self.target_net.load_state_dict(self.policy_net.state_dict())
+        self.target_net.eval()
+
         self.optimizer = optim.Adam(self.policy_net.parameters(), lr=LR)
         self.loss_func = nn.MSELoss()
 
@@ -215,6 +220,7 @@ def train():
     num_action = len(space_game.action_list)
     agent = SpaceInvaderDQN(height=HEIGHT, width=WIDTH, num_action=num_action)
     for ep_i in range(N_EPISODES):
+        total_episode_reward = 0
         space_game.init_game()
         state = space_game.get_screen()
         state = tranform_state(state)
@@ -226,6 +232,7 @@ def train():
             best_action = agent.select_action(state, step)
             best_action_string = space_game.action_list[best_action.item()]
             step_reward = space_game.step(best_action_string)
+            total_episode_reward += step_reward
             next_state = space_game.get_screen()
             next_state = tranform_state(next_state)
             reward = torch.tensor([step_reward], device=device)
@@ -235,13 +242,16 @@ def train():
             state = next_state
             opt_start = time.time()
             agent.optimize_model(memory)
-            print(
-                f"Episode: {ep_i}. Step: {step}. Last Best Action: {best_action_string}."
-                f"Reward: {step_reward}. Time: {time.time() - start_time}. "
-                f"Opt Time: {time.time() - opt_start}"
-            )
+            # print(
+            #     f"Episode: {ep_i}. Step: {step}. Last Best Action: {best_action_string}."
+            #     f"Reward: {step_reward}. Time: {time.time() - start_time}. "
+            #     f"Opt Time: {time.time() - opt_start}"
+            # )
             if step >= MAX_STEPS:
                 break
+        if ep_i % TARGET_UPDATE == 0:
+            agent.target_net.load_state_dict(agent.policy_net.state_dict())
+        print(f"Episode: {ep_i}. Total Reward: {total_episode_reward}")
 
 
 if __name__ == "__main__":
