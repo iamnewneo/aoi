@@ -5,7 +5,6 @@ import random
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-import matplotlib.pyplot as plt
 from itertools import count
 import torch.optim as optim
 from collections import namedtuple
