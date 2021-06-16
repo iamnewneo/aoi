@@ -166,6 +166,7 @@ class SpaceInvaderDQN:
         # print(f"unsq_1 took: {unsq_1_time - cat_time} sec")
 
         # print("Here 1")
+        state_batch = state_batch.to(device)
         state_action_values = self.policy_net(state_batch).gather(1, action_batch)
         next_state_values = torch.zeros(BATCH_SIZE, device=device)
 
@@ -179,6 +180,7 @@ class SpaceInvaderDQN:
         # print(f"unsq_2 took: {unsq_2_time - policy_time} sec")
 
         # print("Here 2")
+        non_final_next_states = non_final_next_states.to(device)
         with torch.no_grad():
             next_state_values[non_final_mask] = (
                 self.target_net(non_final_next_states).max(1)[0].detach()
