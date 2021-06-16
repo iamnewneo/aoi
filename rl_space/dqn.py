@@ -27,8 +27,8 @@ EPS_END = 0.05
 EPS_DECAY = 200
 
 # game constants
-WIDTH = 256
-HEIGHT = 256
+WIDTH = 128
+HEIGHT = 128
 
 Transition = namedtuple("Transition", ("state", "action", "next_state", "reward"))
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -77,7 +77,7 @@ class NNModel(nn.Module):
         )
         self.bn2 = nn.BatchNorm2d(32)
 
-        linear_input_size = 2032128
+        linear_input_size = 492032
         self.linear_input_size = linear_input_size
         self.fc = nn.Linear(linear_input_size, num_action)
 
