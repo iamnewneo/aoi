@@ -362,6 +362,23 @@ class SpaceInvaderGame:
         mixer.music.pause()
 
     def init_game(self):
+        self.life = 1
+        self.level = 1
+        self.difficulty = 1
+        self.score = 0
+        self.highest_score = 0
+        self.kills = 0
+        self.running = True
+        self.pause_state = 0
+        self.frame_count = 0
+        self.fps = 0
+        self.single_frame_rendering_time = 0
+        self.max_kills_to_difficulty_up = 5
+        self.max_difficulty_to_level_up = 5
+        self.initial_player_velocity = 3.0
+        self.initial_enemy_velocity = 1.0
+        self.weapon_shot_velocity = 5.0
+        self.total_time = 0
         # player
         player_img_path = "res/images/spaceship.png"  # 64 x 64 px image
         player_width = 64
