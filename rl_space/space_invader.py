@@ -142,7 +142,7 @@ class Laser:
 
 class SpaceInvaderGame:
     def __init__(self) -> None:
-        self.life = 3
+        self.life = 1
         self.level = 1
         self.difficulty = 1
         self.score = 0
@@ -297,11 +297,13 @@ class SpaceInvaderGame:
         self.life -= 1
         new_laser = laser_obj
         # print("Life Left:", self.life)
-        if self.life > 0:
-            new_player = self.rebirth(player_obj)
-        else:
-            self.gameover()
-        return new_player, new_laser
+        # if self.life > 0:
+        #     new_player = self.rebirth(player_obj)
+        # else:
+        #     self.gameover()
+        # return new_player, new_laser
+        self.gameover()
+        return new_laser
 
     def scoreboard(self):
         x_offset = 10
@@ -520,11 +522,10 @@ class SpaceInvaderGame:
         for i in range(n_lasers):
             laser_player_collision = self.collision_check(self.lasers[i], self.player)
             if laser_player_collision:
-                new_player, new_laser = self.kill_player(
+                new_laser = self.kill_player(
                     self.player, self.enemies[i], self.lasers[i]
                 )
                 self.lasers[i] = new_laser
-                self.player = new_player
                 reward = -1
 
         for i in range(n_enemies):
@@ -534,11 +535,10 @@ class SpaceInvaderGame:
                     self.player, self.bullet, self.enemies[i]
                 )
                 self.enemies[i] = new_enemy_obj
-                new_player, new_laser = self.kill_player(
+                new_laser = self.kill_player(
                     self.player, self.enemies[i], self.lasers[i]
                 )
                 self.lasers[i] = new_laser
-                self.player = new_player
                 reward = -1
 
         for i in range(n_lasers):
