@@ -18,7 +18,7 @@ from space_invader import SpaceInvaderGame
 
 torch.set_flush_denormal(True)
 
-TRAINING = False
+TRAINING = True
 
 MEM_CAPACITY = 1000000
 LR = 1e-3
