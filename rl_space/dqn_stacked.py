@@ -20,7 +20,7 @@ TRAINING = True
 
 MEM_CAPACITY = 1000000
 LR = 1e-3
-N_EPISODES = 200
+N_EPISODES = 500
 MAX_STEPS = 50000
 BATCH_SIZE = 64
 GAMMA = 0.999
@@ -283,7 +283,7 @@ def train():
 
         best_action = random.randint(1, num_action) - 1
         best_action_string = space_game.action_list[best_action]
-        step_reward = space_game.step(best_action_string)
+        step_reward, done = space_game.step(best_action_string)
 
         next_state = space_game.get_screen()
         next_state, stacked_frames = stack_frames(stacked_frames, next_state, False)
@@ -311,7 +311,7 @@ def train():
 
             best_action = agent.select_action(state, step)
             best_action_string = space_game.action_list[best_action.item()]
-            step_reward = space_game.step(best_action_string)
+            step_reward, done = space_game.step(best_action_string)
             total_episode_reward += step_reward
 
             next_state = space_game.get_screen()
@@ -328,12 +328,13 @@ def train():
             opt_start = time.time()
 
             agent.optimize_model(memory)
-            # print(
-            #     f"Episode: {ep_i}. Step: {step}. Last Best Action: {best_action_string}."
-            #     f"Reward: {step_reward}. Time: {time.time() - start_time}. "
-            #     f"Opt Time: {time.time() - opt_start}"
-            # )
-            if step >= MAX_STEPS:
+            if step % 1000 == 0:
+                print(
+                    f"Episode: {ep_i}. Step: {step}. Last Best Action: {best_action_string}. "
+                    f"Reward: {step_reward}. Time: {time.time() - start_time}. "
+                    f"Opt Time: {time.time() - opt_start}"
+                )
+            if done or step >= MAX_STEPS:
                 break
         if ep_i % TARGET_UPDATE == 0:
             agent.target_net.load_state_dict(agent.policy_net.state_dict())
@@ -368,12 +369,14 @@ def simulate():
         action = agent.policy_net(state)
         best_action_max_value, best_action_max_index = torch.max(action, 1)
         best_action_string = space_game.action_list[best_action_max_index.item()]
-        _ = space_game.step(best_action_string)
+        _, done = space_game.step(best_action_string)
 
         next_state = space_game.get_screen()
         next_state, stacked_frames = stack_frames(stacked_frames, next_state, False)
 
         state = next_state
+        if done:
+            break
 
 
 if __name__ == "__main__":

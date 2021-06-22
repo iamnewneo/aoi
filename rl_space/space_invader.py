@@ -609,8 +609,10 @@ class SpaceInvaderGame:
             self.fps = self.frame_count
             self.frame_count = 0
             self.total_time = 0
-
-        return reward
+        done = False
+        if reward == -1:
+            done = True
+        return reward, done
 
 
 if __name__ == "__main__":
