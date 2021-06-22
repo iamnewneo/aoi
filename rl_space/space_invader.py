@@ -27,6 +27,8 @@ class Action:
     UP_ARROW_KEY_PRESSED: str = "UP_ARROW_KEY_PRESSED"
     DO_NOTHING: str = "DO_NOTHING"
     SPACE_BAR_PRESSED: str = "SPACE_BAR_PRESSED"
+    LEFT_FIRE: str = "LEFT_FIRE"
+    RIGHT_FIRE: str = "RIGHT_FIRE"
 
 
 # create display window
@@ -171,6 +173,8 @@ class SpaceInvaderGame:
             "RIGHT_ARROW_KEY_PRESSED",
             "UP_ARROW_KEY_PRESSED",
             "DO_NOTHING",
+            "LEFT_FIRE",
+            "RIGHT_FIRE",
         ]
 
     def collision_check(self, object1, object2):
@@ -186,6 +190,7 @@ class SpaceInvaderGame:
     def get_screen(self):
         surface_copy = pygame.display.get_surface().copy()
         screen_np = pygame.surfarray.pixels2d(surface_copy)
+        screen_np = screen_np.astype(np.int16)
         return screen_np
 
     def init_background_music(self):
@@ -457,12 +462,15 @@ class SpaceInvaderGame:
         start_time = time.time()
         window.fill((0, 0, 0))
         window.blit(background_img, (0, 0))
-        if action == Action.RIGHT_ARROW_KEY_PRESSED:
+        if action == Action.RIGHT_ARROW_KEY_PRESSED or action == Action.RIGHT_FIRE:
             self.player.x += self.player.dx
-        elif action == Action.LEFT_ARROW_KEY_PRESSED:
+        elif action == Action.LEFT_ARROW_KEY_PRESSED or action == Action.LEFT_FIRE:
             self.player.x -= self.player.dx
         elif (
-            action == Action.SPACE_BAR_PRESSED or action == Action.UP_ARROW_KEY_PRESSED
+            action == Action.SPACE_BAR_PRESSED
+            or action == Action.UP_ARROW_KEY_PRESSED
+            or action == Action.LEFT_FIRE
+            or action == Action.RIGHT_FIRE
         ) and not self.bullet.fired:
             self.bullet.fired = True
             self.bullet.fire_sound.play()
@@ -507,7 +515,7 @@ class SpaceInvaderGame:
                     self.player, self.bullet, self.enemies[i]
                 )
                 self.enemies[i] = new_enemy_obj
-                reward = 10
+                reward = 1
 
         for i in range(n_lasers):
             laser_player_collision = self.collision_check(self.lasers[i], self.player)
@@ -517,7 +525,7 @@ class SpaceInvaderGame:
                 )
                 self.lasers[i] = new_laser
                 self.player = new_player
-                reward = -10
+                reward = -1
 
         for i in range(n_enemies):
             enemy_player_collision = self.collision_check(self.enemies[i], self.player)
@@ -531,7 +539,7 @@ class SpaceInvaderGame:
                 )
                 self.lasers[i] = new_laser
                 self.player = new_player
-                reward = -10
+                reward = -1
 
         for i in range(n_lasers):
             bullet_laser_collision = self.collision_check(self.bullet, self.lasers[i])
@@ -623,4 +631,3 @@ if __name__ == "__main__":
     if not gameover:
         # print("Game Not Over")
         space_game.gameover()
-
