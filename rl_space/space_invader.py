@@ -219,7 +219,7 @@ class SpaceInvaderGame:
         if self.level % 3 == 0:
             self.player.dx += 1
             self.bullet.dy += 1
-            self.fmax_difficulty_to_level_up += 1
+            self.max_difficulty_to_level_up += 1
             for each_laser in self.lasers:
                 each_laser.shoot_probability += 0.1
                 if each_laser.shoot_probability > 1.0:
