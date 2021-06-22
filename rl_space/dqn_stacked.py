@@ -9,9 +9,7 @@ from itertools import count
 import torch.optim as optim
 from collections import namedtuple
 
-import torchvision.transforms as T
 from collections import deque
-from PIL import Image
 from skimage import transform
 from skimage.color import rgb2gray
 from space_invader import SpaceInvaderGame
@@ -159,7 +157,6 @@ class NNModel(nn.Module):
 class SpaceInvaderDQN:
     def __init__(self, height, width, num_action) -> None:
         self.num_action = num_action
-
         self.policy_net = NNModel(height, width, num_action=num_action).to(device)
         self.target_net = NNModel(height, width, num_action=num_action).to(device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
