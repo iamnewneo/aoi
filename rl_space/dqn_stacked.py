@@ -328,11 +328,11 @@ def train():
             opt_start = time.time()
 
             agent.optimize_model(memory)
-            print(
-                f"Episode: {ep_i}. Step: {step}. Last Best Action: {best_action_string}."
-                f"Reward: {step_reward}. Time: {time.time() - start_time}. "
-                f"Opt Time: {time.time() - opt_start}"
-            )
+            # print(
+            #     f"Episode: {ep_i}. Step: {step}. Last Best Action: {best_action_string}."
+            #     f"Reward: {step_reward}. Time: {time.time() - start_time}. "
+            #     f"Opt Time: {time.time() - opt_start}"
+            # )
             if step >= MAX_STEPS:
                 break
         if ep_i % TARGET_UPDATE == 0:
