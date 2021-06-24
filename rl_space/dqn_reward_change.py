@@ -383,7 +383,10 @@ def simulate():
 
 if __name__ == "__main__":
     if TRAINING:
-        train()
+        try:
+            train()
+        except Exception as e:
+            print(e)
     else:
         simulate()
 
