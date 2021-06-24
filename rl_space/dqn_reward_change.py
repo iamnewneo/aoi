@@ -338,7 +338,9 @@ def train():
                 break
         if ep_i % TARGET_UPDATE == 0:
             agent.target_net.load_state_dict(agent.policy_net.state_dict())
-        print(f"Episode: {ep_i}. Total Reward: {total_episode_reward}")
+        print(
+            f"Episode: {ep_i}. Total Reward: {total_episode_reward}. Total Casualties: {space_game.total_casualties}"
+        )
         if TRAINING and ep_i % 5 == 0:
             save_path = f"policy_net_ep_{ep_i}.pth"
             torch.save(agent.policy_net.state_dict(), save_path)
