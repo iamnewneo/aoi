@@ -496,9 +496,9 @@ class SpaceInvaderGame:
         window.blit(background_img, (0, 0))
         if action == Action.RIGHT_ARROW_KEY_PRESSED or action == Action.RIGHT_FIRE:
             self.player.x += self.player.dx
-        elif action == Action.LEFT_ARROW_KEY_PRESSED or action == Action.LEFT_FIRE:
+        if action == Action.LEFT_ARROW_KEY_PRESSED or action == Action.LEFT_FIRE:
             self.player.x -= self.player.dx
-        elif (
+        if (
             action == Action.SPACE_BAR_PRESSED
             or action == Action.UP_ARROW_KEY_PRESSED
             or action == Action.LEFT_FIRE
