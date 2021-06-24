@@ -381,6 +381,8 @@ class SpaceInvaderGame:
         self.initial_enemy_velocity = 1.0
         self.weapon_shot_velocity = 5.0
         self.total_time = 0
+        self.available_bullets = 50
+        self.total_casualties = 0
         self.init_background_music()
         # player
         player_img_path = "res/images/spaceship.png"  # 64 x 64 px image

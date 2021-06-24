@@ -20,7 +20,7 @@ TRAINING = True
 
 MEM_CAPACITY = 1000000
 LR = 1e-3
-N_EPISODES = 500
+N_EPISODES = 10000
 MAX_STEPS = 50000
 BATCH_SIZE = 64
 GAMMA = 0.999
@@ -331,8 +331,8 @@ def train():
             if step % 1000 == 0:
                 print(
                     f"Episode: {ep_i}. Step: {step}. Last Best Action: {best_action_string}. "
-                    f"Reward: {step_reward}. Time: {time.time() - start_time}. "
-                    f"Opt Time: {time.time() - opt_start}"
+                    f"Reward: {step_reward}. Total Casualties: {space_game.total_casualties}."
+                    f"Time: {time.time() - start_time}. Opt Time: {time.time() - opt_start}"
                 )
             if done or step >= MAX_STEPS:
                 break
