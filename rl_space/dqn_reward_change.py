@@ -38,6 +38,8 @@ HEIGHT = 180
 
 STACK_SIZE = 4
 
+MODEL_PATHS = "./models"
+
 Transition = namedtuple("Transition", ("state", "action", "next_state", "reward"))
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -360,9 +362,9 @@ def train():
             f"Episode: {ep_i}. Total Reward: {total_episode_reward}. Total Casualties: {space_game.total_casualties}"
         )
         if TRAINING and ep_i % 5 == 0:
-            save_path = f"policy_net_ep_{ep_i}.pth"
+            save_path = f"{MODEL_PATHS}/policy_net_ep_{ep_i}.pth"
             torch.save(agent.policy_net.state_dict(), save_path)
-    save_path = f"policy_net_model.pth"
+    save_path = f"{MODEL_PATHS}/policy_net_model.pth"
     torch.save(agent.policy_net.state_dict(), save_path)
 
 
