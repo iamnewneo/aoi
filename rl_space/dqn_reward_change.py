@@ -2,6 +2,7 @@ import time
 import math
 import torch
 import random
+import traceback
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
@@ -32,8 +33,8 @@ EPS_END = 0.05
 EPS_DECAY = 200
 
 # game constants
-WIDTH = 224
-HEIGHT = 224
+WIDTH = 240
+HEIGHT = 180
 
 STACK_SIZE = 4
 
@@ -114,12 +115,12 @@ class NNModel(nn.Module):
     def __init__(self, height, width, num_action):
         super(NNModel, self).__init__()
         self.conv1 = nn.Conv2d(
-            in_channels=4, out_channels=32, kernel_size=8, padding=1, stride=4
+            in_channels=4, out_channels=32, kernel_size=3, padding=1, stride=2
         )
         self.bn1 = nn.BatchNorm2d(32)
 
         self.conv2 = nn.Conv2d(
-            in_channels=32, out_channels=64, kernel_size=4, padding=1, stride=2
+            in_channels=32, out_channels=64, kernel_size=3, padding=1, stride=2
         )
         self.bn2 = nn.BatchNorm2d(64)
 
@@ -128,25 +129,42 @@ class NNModel(nn.Module):
         )
         self.bn3 = nn.BatchNorm2d(64)
 
-        linear_input_size = 12544
+        linear_input_size = 64 * 30 * 23
+        linear_input_size = int(linear_input_size)
         self.linear_input_size = linear_input_size
         self.fc = nn.Linear(linear_input_size, num_action)
 
     def forward(self, x):
+        # print("inp")
+        # print(x.shape)
         start_time = time.time()
         x = F.relu(self.conv1(x))
+        # print("conv1")
+        # print(x.shape)
         x = self.bn1(x)
+        # print("bn1")
+        # print(x.shape)
         c_b = time.time()
 
         x = F.relu(self.conv2(x))
+        # print("conv2")
+        # print(x.shape)
         cb_time = time.time()
         # print(f"Conv2 Time: {cb_time - c_b}")
         x = self.bn2(x)
+        # print("bn2")
+        # print(x.shape)
         c_b_2 = time.time()
         # print(f"BN2 Time: {c_b_2 - cb_time}")
         x = F.relu(self.conv3(x))
+        # print("conv3")
+        # print(x.shape)
         x = self.bn3(x)
+        # print("bn3")
+        # print(x.shape)
         x = x.view(x.shape[0], self.linear_input_size)
+        # print("final x")
+        # print(x.shape)
         view_time = time.time()
         # print(f"View Time: {view_time - c_b_2}")
         x = self.fc(x)
@@ -387,6 +405,7 @@ if __name__ == "__main__":
             train()
         except Exception as e:
             print(e)
+            traceback.print_exc()
     else:
         simulate()
 
