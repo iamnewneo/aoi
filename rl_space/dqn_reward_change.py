@@ -162,7 +162,7 @@ class NNModel(nn.Module):
         x = self.bn3(x)
         # print("bn3")
         # print(x.shape)
-        x = x.view(x.shape[0], self.linear_input_size)
+        x = x.reshape(x.shape[0], self.linear_input_size)
         # print("final x")
         # print(x.shape)
         view_time = time.time()
