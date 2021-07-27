@@ -32,11 +32,10 @@ EPS_END = 0.05
 EPS_DECAY = 200
 
 # game constants
-WIDTH = 110
-HEIGHT = 84
+WIDTH = 224
+HEIGHT = 224
 
 STACK_SIZE = 4
-STATE_SIZE = [110, 84, 4]
 
 Transition = namedtuple("Transition", ("state", "action", "next_state", "reward"))
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -47,14 +46,14 @@ def preprocess_frame(frame):
 
     normalized_frame = gray / 255.0
 
-    preprocessed_frame = transform.resize(normalized_frame, [110, 84])
+    preprocessed_frame = transform.resize(normalized_frame, [WIDTH, HEIGHT])
 
     return preprocessed_frame
 
 
 # Initialize deque with zero-images one array for each image
 stacked_frames = deque(
-    [np.zeros((110, 84), dtype=np.int16) for i in range(STACK_SIZE)], maxlen=4
+    [np.zeros((WIDTH, HEIGHT), dtype=np.int16) for i in range(STACK_SIZE)], maxlen=4
 )
 
 
@@ -65,7 +64,8 @@ def stack_frames(stacked_frames, state, is_new_episode):
     if is_new_episode:
         # Clear our stacked_frames
         stacked_frames = deque(
-            [np.zeros((110, 84), dtype=np.int16) for i in range(STACK_SIZE)], maxlen=4
+            [np.zeros((WIDTH, HEIGHT), dtype=np.int16) for i in range(STACK_SIZE)],
+            maxlen=4,
         )
 
         # Because we're in a new episode, copy the same frame 4x
@@ -128,7 +128,7 @@ class NNModel(nn.Module):
         )
         self.bn3 = nn.BatchNorm2d(64)
 
-        linear_input_size = 2240
+        linear_input_size = 12544
         self.linear_input_size = linear_input_size
         self.fc = nn.Linear(linear_input_size, num_action)
 
@@ -269,7 +269,7 @@ def train():
     num_action = len(space_game.action_list)
     agent = SpaceInvaderDQN(height=HEIGHT, width=WIDTH, num_action=num_action)
     stacked_frames = deque(
-        [np.zeros((110, 84), dtype=np.int16) for i in range(STACK_SIZE)], maxlen=4
+        [np.zeros((WIDTH, HEIGHT), dtype=np.int16) for i in range(STACK_SIZE)], maxlen=4
     )
 
     for i in range(PRETRAIN_LENGTH):
@@ -351,7 +351,7 @@ def train():
 def simulate():
     save_path = f"policy_net_model.pth"
     stacked_frames = deque(
-        [np.zeros((110, 84), dtype=np.int16) for i in range(STACK_SIZE)], maxlen=4
+        [np.zeros((WIDTH, HEIGHT), dtype=np.int16) for i in range(STACK_SIZE)], maxlen=4
     )
 
     space_game = SpaceInvaderGame()

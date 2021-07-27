@@ -555,15 +555,15 @@ class SpaceInvaderGame:
                 reward = 1
                 done = False
 
-        for i in range(n_lasers):
-            laser_player_collision = self.collision_check(self.lasers[i], self.player)
-            if laser_player_collision:
-                new_laser = self.kill_player(
-                    self.player, self.enemies[i], self.lasers[i]
-                )
-                self.lasers[i] = new_laser
-                reward = -1
-                done = True
+        # for i in range(n_lasers):
+        #     laser_player_collision = self.collision_check(self.lasers[i], self.player)
+        # if laser_player_collision:
+        #     new_laser = self.kill_player(
+        #         self.player, self.enemies[i], self.lasers[i]
+        #     )
+        #     self.lasers[i] = new_laser
+        #     reward = -1
+        #     done = True
 
         for i in range(n_enemies):
             enemy_player_collision = self.collision_check(self.enemies[i], self.player)
