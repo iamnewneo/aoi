@@ -281,6 +281,7 @@ class SpaceInvaderDQN:
         self.optimizer.step()
         opt_step_time = time.time()
         # print(f"opt_step took: {opt_step_time - opt_loss_time} sec")
+        return loss.item()
 
 
 def train():
@@ -319,6 +320,7 @@ def train():
     for ep_i in range(N_EPISODES):
         print(f"Episode: {ep_i}")
         total_episode_reward = 0
+        total_episode_loss = 0
         space_game.init_game()
         state = space_game.get_screen()
         state, stacked_frames = stack_frames(stacked_frames, state, True)
@@ -347,7 +349,8 @@ def train():
             state = next_state
             opt_start = time.time()
 
-            agent.optimize_model(memory)
+            step_loss = agent.optimize_model(memory)
+            total_episode_loss += step_loss
             if step % 1000 == 0:
                 print(
                     f"Episode: {ep_i}. Step: {step}. Last Best Action: {best_action_string}. "
@@ -359,7 +362,8 @@ def train():
         if ep_i % TARGET_UPDATE == 0:
             agent.target_net.load_state_dict(agent.policy_net.state_dict())
         print(
-            f"Episode: {ep_i}. Total Reward: {total_episode_reward}. Total Casualties: {space_game.total_casualties}"
+            f"Episode: {ep_i}. Loss: {total_episode_loss/step:.2f} "
+            f"Total Reward: {total_episode_reward}. Total Casualties: {space_game.total_casualties}"
         )
         if TRAINING and ep_i % 5 == 0:
             save_path = f"{MODEL_PATHS}/policy_net_ep_{ep_i}.pth"
