@@ -183,14 +183,17 @@ class SpaceInvaderDQN:
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.eval()
 
-        self.optimizer = optim.Adam(self.policy_net.parameters(), lr=LR)
+        # self.optimizer = optim.Adam(self.policy_net.parameters(), lr=LR)
+        self.optimizer = optim.RMSprop(self.policy_net.parameters())
         self.loss_func = nn.MSELoss()
+        self.steps_done = 0
 
-    def select_action(self, state, steps_done):
+    def select_action(self, state):
         sample = random.random()
         eps_threshold = EPS_END + (EPS_START - EPS_END) * math.exp(
-            -1.0 * steps_done / EPS_DECAY
+            -1.0 * self.steps_done / EPS_DECAY
         )
+        self.steps_done += 1
         if sample > eps_threshold:
             with torch.no_grad():
                 return self.policy_net(state).max(1)[1].view(1, 1)
@@ -296,7 +299,7 @@ def train():
         for step in count():
             start_time = time.time()
 
-            best_action = agent.select_action(state, step)
+            best_action = agent.select_action(state)
             best_action_string = space_game.action_list[best_action.item()]
             step_reward, done = space_game.step(best_action_string)
             total_episode_reward += step_reward
