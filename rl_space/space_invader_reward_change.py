@@ -494,9 +494,12 @@ class SpaceInvaderGame:
         start_time = time.time()
         window.fill((0, 0, 0))
         window.blit(background_img, (0, 0))
+        # Very Reward For Moving
         if action == Action.RIGHT_ARROW_KEY_PRESSED or action == Action.RIGHT_FIRE:
+            reward += 1e-5
             self.player.x += self.player.dx
         if action == Action.LEFT_ARROW_KEY_PRESSED or action == Action.LEFT_FIRE:
+            reward += 1e-5
             self.player.x -= self.player.dx
         if (
             action == Action.SPACE_BAR_PRESSED
@@ -545,6 +548,7 @@ class SpaceInvaderGame:
                 self.lasers[i].y += self.lasers[i].dy
 
         # collision check
+        # Do not reward even if enemy is killed, otherwise player stuck in center/corner
         for i in range(n_enemies):
             bullet_enemy_collision = self.collision_check(self.bullet, self.enemies[i])
             if bullet_enemy_collision:
@@ -552,7 +556,7 @@ class SpaceInvaderGame:
                     self.player, self.bullet, self.enemies[i]
                 )
                 self.enemies[i] = new_enemy_obj
-                reward = 1
+                reward += 0.1
                 done = False
 
         # for i in range(n_lasers):
@@ -648,6 +652,9 @@ class SpaceInvaderGame:
             self.fps = self.frame_count
             self.frame_count = 0
             self.total_time = 0
+        # Give some postive reward for being alive
+        if not done:
+            reward += 1e-5
         return reward, done
 
 

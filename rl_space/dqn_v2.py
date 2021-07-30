@@ -1,3 +1,4 @@
+import gc
 import time
 import math
 import torch
@@ -16,10 +17,11 @@ from skimage.color import rgb2gray
 from space_invader_reward_change import SpaceInvaderGame
 
 torch.set_flush_denormal(True)
+torch.cuda.empty_cache()
 
 TRAINING = True
 
-MEM_CAPACITY = 1000000
+MEM_CAPACITY = 140000
 LR = 1e-3
 N_EPISODES = 10000
 MAX_STEPS = 50000
@@ -33,15 +35,52 @@ EPS_END = 0.05
 EPS_DECAY = 200
 
 # game constants
-WIDTH = 240
-HEIGHT = 180
+WIDTH = 120
+HEIGHT = 90
 
 STACK_SIZE = 4
 
 MODEL_PATHS = "./models_new"
 
 Transition = namedtuple("Transition", ("state", "action", "next_state", "reward"))
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+
+
+def q_mem(mem):
+    total_memory = 0
+    total_state_mem = 0
+    total_action_mem = 0
+    total_next_state_mem = 0
+    total_reward_mem = 0
+    count = 0
+    buffer = mem.buffer
+    for x in buffer:
+        temp_mem = 0
+        state = x.state
+        action = x.action
+        next_state = x.next_state
+        reward = x.reward
+        state_mem = state.element_size() * state.nelement()
+        action_mem = action.element_size() * action.nelement()
+        next_state_mem = next_state.element_size() * next_state.nelement()
+        reward_mem = reward.element_size() * reward.nelement()
+        temp_mem = state_mem + action_mem + next_state_mem + reward_mem
+        total_state_mem += state_mem
+        total_action_mem += action_mem
+        total_next_state_mem += next_state_mem
+        total_reward_mem += reward_mem
+        total_memory += temp_mem
+        count += 1
+
+    total_memory /= 1000000
+    total_state_mem /= 1000000
+    total_action_mem /= 1000000
+    total_next_state_mem /= 1000000
+    total_reward_mem /= 1000000
+    print(
+        f"Total Queue Obejcts: {count} Memory: {total_memory} MB. State Mem: {total_state_mem}"
+        f" Action Mem: {total_action_mem} Next State Mem {total_next_state_mem} Reward Mem {total_reward_mem}"
+    )
 
 
 def preprocess_frame(frame):
@@ -67,8 +106,7 @@ def stack_frames(stacked_frames, state, is_new_episode):
     if is_new_episode:
         # Clear our stacked_frames
         stacked_frames = deque(
-            [np.zeros((WIDTH, HEIGHT), dtype=np.int16) for i in range(STACK_SIZE)],
-            maxlen=4,
+            [torch.zeros((WIDTH, HEIGHT)) for i in range(STACK_SIZE)], maxlen=4,
         )
 
         # Because we're in a new episode, copy the same frame 4x
@@ -78,17 +116,56 @@ def stack_frames(stacked_frames, state, is_new_episode):
         stacked_frames.append(frame)
 
         # Stack the frames
-        stacked_state = np.stack(stacked_frames, axis=0)
+        stacked_state = (
+            torch.stack([torch.tensor(fr) for fr in stacked_frames], axis=0)
+            .unsqueeze(0)
+            .float()
+            .to(device)
+        )
 
     else:
         # Append frame to deque, automatically removes the oldest frame
         stacked_frames.append(frame)
 
         # Build the stacked state (first dimension specifies different frames)
-        stacked_state = np.stack(stacked_frames, axis=0)
-
-    stacked_state = torch.from_numpy(stacked_state).unsqueeze(0).to(device).float()
+        stacked_state = (
+            torch.stack([torch.tensor(fr) for fr in stacked_frames], axis=0)
+            .unsqueeze(0)
+            .float()
+            .to(device)
+        )
     return stacked_state, stacked_frames
+
+
+# def stack_frames(stacked_frames, state, is_new_episode):
+#     # Preprocess frame
+#     frame = preprocess_frame(state)
+
+#     if is_new_episode:
+#         # Clear our stacked_frames
+#         stacked_frames = deque(
+#             [np.zeros((WIDTH, HEIGHT), dtype=np.int16) for i in range(STACK_SIZE)],
+#             maxlen=4,
+#         )
+
+#         # Because we're in a new episode, copy the same frame 4x
+#         stacked_frames.append(frame)
+#         stacked_frames.append(frame)
+#         stacked_frames.append(frame)
+#         stacked_frames.append(frame)
+
+#         # Stack the frames
+#         stacked_state = np.stack(stacked_frames, axis=0)
+
+#     else:
+#         # Append frame to deque, automatically removes the oldest frame
+#         stacked_frames.append(frame)
+
+#         # Build the stacked state (first dimension specifies different frames)
+#         stacked_state = np.stack(stacked_frames, axis=0)
+
+#     stacked_state = torch.from_numpy(stacked_state).unsqueeze(0).to(device).float()
+#     return stacked_state, stacked_frames
 
 
 def transpose_tensors(inp):
@@ -132,7 +209,7 @@ class NNModel(nn.Module):
         )
         self.bn3 = nn.BatchNorm2d(64)
 
-        linear_input_size = 64 * 30 * 23
+        linear_input_size = 64 * 15 * 12
         linear_input_size = int(linear_input_size)
         self.linear_input_size = linear_input_size
         self.fc = nn.Linear(linear_input_size, num_action)
@@ -165,7 +242,7 @@ class NNModel(nn.Module):
         x = self.bn3(x)
         # print("bn3")
         # print(x.shape)
-        x = x.reshape(x.shape[0], self.linear_input_size)
+        x = x.view(x.shape[0], self.linear_input_size)
         # print("final x")
         # print(x.shape)
         view_time = time.time()
@@ -282,9 +359,12 @@ def train():
 
         reward = torch.tensor([step_reward], device=device)
         best_action = torch.tensor([[best_action]], device=device)
-        memory.push(state, best_action, next_state, reward)
+        memory.push(
+            state.detach(), best_action.detach(), next_state.detach(), reward.detach()
+        )
         state = next_state
 
+    # q_mem(memory)
     for ep_i in range(N_EPISODES):
         print(f"Episode: {ep_i}")
         total_episode_reward = 0
@@ -313,7 +393,13 @@ def train():
                 next_state = torch.from_numpy(next_state).unsqueeze(0).to(device)
             next_state = next_state.to(device)
             next_state = next_state.float()
-            memory.push(state, best_action, next_state, reward)
+            # memory.push(state, best_action, next_state, reward)
+            memory.push(
+                state.detach(),
+                best_action.detach(),
+                next_state.detach(),
+                reward.detach(),
+            )
             state = next_state
             opt_start = time.time()
 
@@ -325,10 +411,19 @@ def train():
                     f"Reward: {step_reward}. Total Casualties: {space_game.total_casualties}. "
                     f"Time: {time.time() - start_time}. Opt Time: {time.time() - opt_start}"
                 )
+                # gpu_usage(useOldCode=True)
+                # print("len(memory)")
+                # print(len(memory))
+                # q_mem(memory)
+
             if done or step >= MAX_STEPS:
                 break
         if ep_i % TARGET_UPDATE == 0:
             agent.target_net.load_state_dict(agent.policy_net.state_dict())
+        # gpu_usage(useOldCode=True)
+        # q_mem(memory)
+        gc.collect()
+        torch.cuda.empty_cache()
         print(
             f"Episode: {ep_i}. Loss: {total_episode_loss/step:.2f} "
             f"Total Reward: {total_episode_reward}. Total Casualties: {space_game.total_casualties}"
@@ -341,16 +436,18 @@ def train():
 
 
 def simulate():
-    save_path = f"policy_net_model.pth"
+    save_path = f"{MODEL_PATHS}/policy_net_ep_850.pth"
     stacked_frames = deque(
-        [np.zeros((WIDTH, HEIGHT), dtype=np.int16) for i in range(STACK_SIZE)], maxlen=4
+        [torch.zeros((WIDTH, HEIGHT)) for i in range(STACK_SIZE)], maxlen=4,
     )
 
     space_game = SpaceInvaderGame()
     space_game.init_game()
     num_action = len(space_game.action_list)
     agent = SpaceInvaderDQN(height=HEIGHT, width=WIDTH, num_action=num_action)
-    agent.policy_net.load_state_dict(torch.load(save_path))
+    agent.policy_net.load_state_dict(
+        torch.load(save_path, map_location=torch.device("cpu"))
+    )
     agent.policy_net.eval()
     state = space_game.get_screen()
     state, stacked_frames = stack_frames(stacked_frames, state, True)
@@ -358,11 +455,10 @@ def simulate():
     while True:
         if not torch.is_tensor(state):
             state = torch.from_numpy(state).unsqueeze(0).to(device)
-        state = state.float()
-        state = transpose_tensors(state)
         action = agent.policy_net(state)
         best_action_max_value, best_action_max_index = torch.max(action, 1)
         best_action_string = space_game.action_list[best_action_max_index.item()]
+        print(best_action_string)
         _, done = space_game.step(best_action_string)
 
         next_state = space_game.get_screen()
