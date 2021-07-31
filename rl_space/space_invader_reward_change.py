@@ -496,10 +496,8 @@ class SpaceInvaderGame:
         window.blit(background_img, (0, 0))
         # Very Reward For Moving
         if action == Action.RIGHT_ARROW_KEY_PRESSED or action == Action.RIGHT_FIRE:
-            reward += 1e-5
             self.player.x += self.player.dx
         if action == Action.LEFT_ARROW_KEY_PRESSED or action == Action.LEFT_FIRE:
-            reward += 1e-5
             self.player.x -= self.player.dx
         if (
             action == Action.SPACE_BAR_PRESSED

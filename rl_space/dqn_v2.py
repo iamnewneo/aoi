@@ -27,8 +27,9 @@ N_EPISODES = 10000
 MAX_STEPS = 50000
 BATCH_SIZE = 128
 GAMMA = 0.999
-TARGET_UPDATE = 5
+TARGET_UPDATE = 100
 PRETRAIN_LENGTH = BATCH_SIZE
+FRAME_SKIP = 4
 
 EPS_START = 0.9
 EPS_END = 0.05
@@ -367,6 +368,7 @@ def train():
     # q_mem(memory)
     for ep_i in range(N_EPISODES):
         print(f"Episode: {ep_i}")
+        episode_start_time = time.time()
         total_episode_reward = 0
         total_episode_loss = 0
         space_game.init_game()
@@ -381,8 +383,11 @@ def train():
 
             best_action = agent.select_action(state)
             best_action_string = space_game.action_list[best_action.item()]
-            step_reward, done = space_game.step(best_action_string)
-            total_episode_reward += step_reward
+            for _ in range(FRAME_SKIP):
+                step_reward, done = space_game.step(best_action_string)
+                total_episode_reward += step_reward
+                if done:
+                    break
 
             next_state = space_game.get_screen()
             next_state, stacked_frames = stack_frames(stacked_frames, next_state, False)
@@ -409,12 +414,8 @@ def train():
                 print(
                     f"Episode: {ep_i}. Step: {step}. Last Best Action: {best_action_string}. "
                     f"Reward: {step_reward}. Total Casualties: {space_game.total_casualties}. "
-                    f"Time: {time.time() - start_time}. Opt Time: {time.time() - opt_start}"
+                    f"Time: {time.time() - start_time:.2f}. Opt Time: {time.time() - opt_start:.3f}"
                 )
-                # gpu_usage(useOldCode=True)
-                # print("len(memory)")
-                # print(len(memory))
-                # q_mem(memory)
 
             if done or step >= MAX_STEPS:
                 break
@@ -426,7 +427,8 @@ def train():
         torch.cuda.empty_cache()
         print(
             f"Episode: {ep_i}. Loss: {total_episode_loss/step:.2f} "
-            f"Total Reward: {total_episode_reward}. Total Casualties: {space_game.total_casualties}"
+            f"Total Reward: {total_episode_reward}. Total Casualties: {space_game.total_casualties} "
+            f"Total Time: {time.time() - episode_start_time:.2f}"
         )
         if TRAINING and ep_i % 5 == 0:
             save_path = f"{MODEL_PATHS}/policy_net_ep_{ep_i}.pth"
