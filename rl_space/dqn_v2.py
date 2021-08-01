@@ -13,7 +13,6 @@ from collections import namedtuple
 
 from collections import deque
 from skimage import transform
-from skimage.color import rgb2gray
 from space_invader_reward_change import SpaceInvaderGame
 
 torch.set_flush_denormal(True)
@@ -85,8 +84,12 @@ def q_mem(mem):
 
 
 def preprocess_frame(frame):
-    gray = rgb2gray(frame)
-    preprocessed_frame = transform.resize(gray, [HEIGHT, WIDTH])
+    def rgb2gray(rgb):
+        return np.dot(rgb[..., :3], [0.2989, 0.5870, 0.1140]) / 255
+
+    preprocessed_frame = rgb2gray(frame)
+    preprocessed_frame = transform.resize(preprocessed_frame, [HEIGHT, WIDTH])
+    # preprocessed_frame = preprocessed_frame.transpose(2, 0, 1)
     return preprocessed_frame
 
 
@@ -279,6 +282,8 @@ class SpaceInvaderDQN:
     def optimize_model(self, memory):
         if len(memory) < BATCH_SIZE:
             return
+        self.policy_net.train()
+        self.target_net.eval()
         transitions = memory.sample(BATCH_SIZE)
         # Transpose the batch (see https://stackoverflow.com/a/19343/3343043 for
         # detailed explanation). This converts batch-array of Transitions
@@ -456,7 +461,8 @@ def simulate():
     while True:
         if not torch.is_tensor(state):
             state = torch.from_numpy(state).unsqueeze(0).to(device)
-        action = agent.policy_net(state)
+        with torch.no_grad():
+            action = agent.policy_net(state)
         best_action_max_value, best_action_max_index = torch.max(action, 1)
         best_action_string = space_game.action_list[best_action_max_index.item()]
         for _ in range(FRAME_SKIP):
