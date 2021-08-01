@@ -364,6 +364,7 @@ def train():
     # q_mem(memory)
     for ep_i in range(N_EPISODES):
         print(f"Episode: {ep_i}")
+        action_count_dict = {_a: 0 for _a in space_game.action_list}
         episode_start_time = time.time()
         total_episode_reward = 0
         total_episode_loss = 0
@@ -379,6 +380,7 @@ def train():
 
             best_action = agent.select_action(state)
             best_action_string = space_game.action_list[best_action.item()]
+            action_count_dict[best_action_string] += 1
             for _ in range(FRAME_SKIP):
                 step_reward, done = space_game.step(best_action_string)
                 total_episode_reward += step_reward
@@ -426,6 +428,7 @@ def train():
             f"Total Reward: {total_episode_reward}. Total Casualties: {space_game.total_casualties} "
             f"Total Time: {time.time() - episode_start_time:.2f}"
         )
+        print(f"Action Distribution: {action_count_dict}")
         if TRAINING and ep_i % 5 == 0:
             save_path = f"{MODEL_PATHS}/policy_net_ep_{ep_i}.pth"
             torch.save(agent.policy_net.state_dict(), save_path)
