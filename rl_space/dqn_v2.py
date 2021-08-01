@@ -86,11 +86,7 @@ def q_mem(mem):
 
 def preprocess_frame(frame):
     gray = rgb2gray(frame)
-
-    normalized_frame = gray / 255.0
-
-    preprocessed_frame = transform.resize(normalized_frame, [WIDTH, HEIGHT])
-
+    preprocessed_frame = transform.resize(gray, [HEIGHT, WIDTH])
     return preprocessed_frame
 
 
@@ -438,7 +434,7 @@ def train():
 
 
 def simulate():
-    save_path = f"{MODEL_PATHS}/policy_net_ep_850.pth"
+    save_path = f"{MODEL_PATHS}/policy_net_ep_500.pth"
     stacked_frames = deque(
         [torch.zeros((WIDTH, HEIGHT)) for i in range(STACK_SIZE)], maxlen=4,
     )
@@ -460,8 +456,10 @@ def simulate():
         action = agent.policy_net(state)
         best_action_max_value, best_action_max_index = torch.max(action, 1)
         best_action_string = space_game.action_list[best_action_max_index.item()]
-        print(best_action_string)
-        _, done = space_game.step(best_action_string)
+        for _ in range(FRAME_SKIP):
+            _, done = space_game.step(best_action_string)
+            if done:
+                break
 
         next_state = space_game.get_screen()
         next_state, stacked_frames = stack_frames(stacked_frames, next_state, False)

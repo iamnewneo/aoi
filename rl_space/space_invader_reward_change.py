@@ -191,7 +191,8 @@ class SpaceInvaderGame:
 
     def get_screen(self):
         surface_copy = pygame.display.get_surface().copy()
-        screen_np = pygame.surfarray.pixels2d(surface_copy)
+        screen_np = pygame.surfarray.array3d(surface_copy)
+        screen_np = screen_np.swapaxes(0, 1)
         screen_np = screen_np.astype(np.int16)
         return screen_np
 
