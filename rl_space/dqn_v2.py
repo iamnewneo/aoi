@@ -21,7 +21,7 @@ torch.cuda.empty_cache()
 TRAINING = True
 
 MEM_CAPACITY = 140000
-LR = 1e-3
+LR = 1e-4
 N_EPISODES = 10000
 MAX_STEPS = 50000
 BATCH_SIZE = 128
@@ -40,7 +40,7 @@ HEIGHT = 90
 
 STACK_SIZE = 4
 
-MODEL_PATHS = "./models_new"
+MODEL_PATHS = "./models_fs/lr_{LR}_tg_{TARGET_UPDATE}"
 
 Transition = namedtuple("Transition", ("state", "action", "next_state", "reward"))
 device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
