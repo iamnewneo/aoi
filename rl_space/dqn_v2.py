@@ -7,6 +7,7 @@ import traceback
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
+from pathlib import Path
 from itertools import count
 import torch.optim as optim
 from collections import namedtuple
@@ -41,7 +42,7 @@ HEIGHT = 90
 STACK_SIZE = 4
 
 MODEL_PATHS = "./models_fs/lr_{LR}_tg_{TARGET_UPDATE}"
-
+Path(MODEL_PATHS).mkdir(parents=True, exist_ok=True)
 Transition = namedtuple("Transition", ("state", "action", "next_state", "reward"))
 device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 
