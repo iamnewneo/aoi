@@ -143,7 +143,7 @@ class Laser:
 class SpaceInvaderGame:
     def __init__(self) -> None:
         self.life = 1
-        self.level = 1
+        self.level = 2
         self.difficulty = 1
         self.score = 0
         self.highest_score = 0
@@ -366,7 +366,7 @@ class SpaceInvaderGame:
 
     def init_game(self):
         self.life = 1
-        self.level = 1
+        self.level = 2
         self.difficulty = 1
         self.score = 0
         self.highest_score = 0
@@ -487,7 +487,7 @@ class SpaceInvaderGame:
         Return reward, done
         """
         if self.available_bullets == 0:
-            reward = -0.5
+            reward = -1
             done = True
             return reward, done
         reward = 0
@@ -555,18 +555,18 @@ class SpaceInvaderGame:
                     self.player, self.bullet, self.enemies[i]
                 )
                 self.enemies[i] = new_enemy_obj
-                reward += 0.1
+                reward += 0.5
                 done = False
 
-        # for i in range(n_lasers):
-        #     laser_player_collision = self.collision_check(self.lasers[i], self.player)
-        # if laser_player_collision:
-        #     new_laser = self.kill_player(
-        #         self.player, self.enemies[i], self.lasers[i]
-        #     )
-        #     self.lasers[i] = new_laser
-        #     reward = -1
-        #     done = True
+        for i in range(n_lasers):
+            laser_player_collision = self.collision_check(self.lasers[i], self.player)
+            if laser_player_collision:
+                new_laser = self.kill_player(
+                    self.player, self.enemies[i], self.lasers[i]
+                )
+                self.lasers[i] = new_laser
+                reward = -1
+                done = True
 
         for i in range(n_enemies):
             enemy_player_collision = self.collision_check(self.enemies[i], self.player)
