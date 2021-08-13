@@ -24,3 +24,6 @@ To simulate the game:
 ```
 python simulate_game.py
 ```
+
+## Note
+None of the hyperparamters are changed from the original. I just removed unncessary code and refactored it to make it more readable. Current simulation is the best I could get.
