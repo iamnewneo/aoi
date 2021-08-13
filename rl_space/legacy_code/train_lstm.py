@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import torch
 from torch import nn
+from torch._C import device
 
 from train_cnn import CNNModel
 
@@ -137,8 +138,11 @@ class RNNTrainer:
         opt = torch.optim.SGD(rnn.parameters(), lr=LR)
         for epoch in range(N_EPOCHS):
             for s_i, s in enumerate(sequences):
+                hidden_tensor = torch.zeros(
+                    num_hidden, 1, hidden_d, dtype=torch.float, device=DEVICE
+                )
                 pred, _ = rnn(
-                    s[:-1, ...], torch.zeros(num_hidden, 1, hidden_d, dtype=torch.float)
+                    s[:-1, ...], hidden_tensor
                 )  # predict next step, init hidden state to zero at the begining of the sequence
                 err = criterion(pred, s[1:, ...])  # predict next step for each step
                 opt.zero_grad()
