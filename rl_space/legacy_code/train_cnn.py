@@ -95,7 +95,9 @@ class CNNTrainer:
             )
             data2.append(
                 np.array(
-                    np.transpose(np.asarray(u_frames[(i + 1) % len(u_frames)]), (2, 0, 1)),
+                    np.transpose(
+                        np.asarray(u_frames[(i + 1) % len(u_frames)]), (2, 0, 1)
+                    ),
                     dtype=np.float32,
                 )
             )
@@ -156,10 +158,15 @@ class CNNTrainer:
 
         def image_to_numpy(img):
             data3 = []
-            data3.append(np.array(np.transpose(np.asarray(img), (2, 0, 1)), dtype=np.float32))
+            data3.append(
+                np.array(np.transpose(np.asarray(img), (2, 0, 1)), dtype=np.float32)
+            )
             y3 = np.array(data3)
             x_1 = torch.from_numpy(y3)
-            output = self.model(x_1[0].reshape(1, 3, 100, 100))[0].detach().numpy()
+            x_1 = x_1.to(DEVICE)
+            output = (
+                self.model(x_1[0].reshape(1, 3, 100, 100))[0].detach().cpu().numpy()
+            )
             return output
 
         for i in range(num_channels):
