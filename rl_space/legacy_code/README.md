@@ -1,12 +1,13 @@
 ## General Info
 The folder in this repository includes code for replicating the Video Game code. The code is refactored in such a way that it is easier to understand and make any changes. Training on GPU is also supported for CNN and LSTM now.
-The folder mainly consists of 4 files:
+<br />
+#### The folder mainly consists of 4 files:
 1. train_cnn.py - Used to train CNN model [H-Score] to identify the label of frame and location of enemy
 2. train_lstm.py - Used to train LSTM model to predict next position of the enemy
 3. train_driver.py - Single script which combines train_cnn.py and train_lstm.py. 
 4. simulate_game.py - Once the CNN and LSTM models are trained, we can simulate the game using this script
-
-Important Folders:
+<br />
+#### Important Folders:
 1. data - Contains data required for training and inference (e.g Video file and dictionary of the channel to label mapping)
 2. models - Contains PyTorch model files, used in the simulation
 3. res - Contains resources like images, sound, etc required to run the game
