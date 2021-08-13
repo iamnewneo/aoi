@@ -130,7 +130,6 @@ class RNNTrainer:
         out_d = in_d
         hidden_d = 8
         num_hidden = 1
-        print(in_d, out_d, hidden_d, num_hidden)
         rnn = RNNModel(in_d, out_d, hidden_d, num_hidden)
         rnn.to(DEVICE)
         loss = []
