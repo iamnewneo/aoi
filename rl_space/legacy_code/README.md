@@ -17,6 +17,7 @@ Python3, Pytorch, Pygame, Numpy
 
 ## Setup
 To run this project, first install the requirements.
+<br />
 To train the model (if model files are not present)
 ```
 python train_driver.py
