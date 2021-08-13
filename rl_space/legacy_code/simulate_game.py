@@ -1,3 +1,4 @@
+import json
 import os
 import random
 
@@ -31,27 +32,24 @@ def val_pos(array):
     return value, scaled_position
 
 
-def get_spaceship_position(frame):
+enemy_moving_panels = None
+enemy_reloading_panels = None
+enemy_moving_enemy_reloading_panels = None
+with open("./data/tank_moving_panels.json", "r") as f:
+    enemy_moving_panels = json.load(f)
+with open("./data/tank_reloading_panels.json", "r") as f:
+    enemy_reloading_panels = json.load(f)
+with open("./data/tmtr_panels.json", "r") as f:
+    enemy_moving_enemy_reloading_panels = json.load(f)
 
-    enemy_moving_panels = {
-        0: 2732.369384765625,
-        1: 2737.047119140625,
-        2: 2394.4951171875,
-        4: 2190.078857421875,
-        7: 2297.058837890625,
-        9: 2978.161376953125,
-        11: 2600.28759765625,
-        15: 2298.097412109375,
-    }
-    enemy_reloading_panels = {
-        5: 3207.76171875,
-        6: 2881.5322265625,
-        8: 1940.783203125,
-        10: 2830.391845703125,
-        12: 1608.0382080078125,
-        14: 3129.3603515625,
-    }
-    enemy_moving_enemy_reloading_panels = {3: 3096.512451171875, 13: 2212.85302734375}
+enemy_moving_panels = {int(k): v for k, v in enemy_moving_panels.items()}
+enemy_reloading_panels = {int(k): v for k, v in enemy_reloading_panels.items()}
+enemy_moving_enemy_reloading_panels = {
+    int(k): v for k, v in enemy_moving_enemy_reloading_panels.items()
+}
+
+
+def get_spaceship_position(frame):
     h = 0
     predicted_location = -1
     flag = True
