@@ -16,8 +16,8 @@ The folder in this repository includes code for replicating the Video Game code.
 Python3, Pytorch, Pygame, Numpy
 
 ## Setup
-To run this project install the requirements.
-To train the model first (if model files are not present)
+To run this project, first install the requirements.
+To train the model (if model files are not present)
 ```
 python train_driver.py
 ```
