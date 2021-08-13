@@ -1,5 +1,5 @@
 ## General Info
-The folder in this repository includes code for replicating the Video Game Code. Code is refactored, in such a way that it is easier to understand and make any changes.
+The folder in this repository includes code for replicating the Video Game code. The code is refactored in such a way that it is easier to understand and make any changes.
 The folder mainly consists of 4 files:
 1. train_cnn.py - Used to train CNN model [H-Score] to identify the label of frame and location of enemy
 2. train_lstm.py - Used to train LSTM model to predict next position of the enemy
@@ -16,7 +16,7 @@ Python3, Pytorch, Pygame, Numpy
 
 ## Setup
 To run this project install the requirements.
-To train the model first (if model files are absent)
+To train the model first (if model files are not present)
 ```
 python train_driver.py
 ```
