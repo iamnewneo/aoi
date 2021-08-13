@@ -26,4 +26,4 @@ python simulate_game.py
 ```
 
 ## Note
-None of the hyperparamters are changed from the original. I just removed unncessary code and refactored it to make it more readable. Current simulation is the best I could get.
+None of the hyperparamters are changed from the original. I just removed unncessary code and refactored it to make it more readable. Current simulation is the best I could get. Hardcoding of channel to class label mapping is removed, they are now stored in a dictionary/json in data folder.
