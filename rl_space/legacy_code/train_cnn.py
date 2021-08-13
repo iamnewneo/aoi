@@ -62,40 +62,40 @@ class CNNTrainer:
         data_exists = False
         if os.path.isfile("./data/u_frames.pkl"):
             with open("./data/u_frames.pkl", "rb") as f:
-                uframes = pickle.load(f)
+                u_frames = pickle.load(f)
             data_exists = True
 
         if not data_exists:
-            print("Uframes not present, recreating.")
-            uframes = []
+            print("U_Frames not present, recreating.")
+            u_frames = []
             vidcap = cv2.VideoCapture("./data/atari_2_vehicles.avi")
             success, image = vidcap.read()
             while success:
-                uframes.append(image)
+                u_frames.append(image)
                 success, image = vidcap.read()
 
-            for i, frame in enumerate(uframes):
-                uframes[i] = cv2.resize(frame, (100, 100))
+            for i, frame in enumerate(u_frames):
+                u_frames[i] = cv2.resize(frame, (100, 100))
 
             # release the cap object
             vidcap.release()
             with open("./data/u_frames.pkl", "wb") as f:
-                pickle.dump(uframes, f, protocol=pickle.HIGHEST_PROTOCOL)
+                pickle.dump(u_frames, f, protocol=pickle.HIGHEST_PROTOCOL)
 
-        self.u_frames = uframes
+        self.u_frames = u_frames
 
         data1 = []
         data2 = []
         for i in range(SAMPLES):
             data1.append(
                 np.array(
-                    np.transpose(np.asarray(uframes[i % len(uframes)]), (2, 0, 1)),
+                    np.transpose(np.asarray(u_frames[i % len(u_frames)]), (2, 0, 1)),
                     dtype=np.float32,
                 )
             )
             data2.append(
                 np.array(
-                    np.transpose(np.asarray(uframes[(i + 1) % len(uframes)]), (2, 0, 1)),
+                    np.transpose(np.asarray(u_frames[(i + 1) % len(u_frames)]), (2, 0, 1)),
                     dtype=np.float32,
                 )
             )
@@ -164,15 +164,15 @@ class CNNTrainer:
 
         for i in range(num_channels):
 
-            output = image_to_numpy(self.uframes[tmtr])
+            output = image_to_numpy(self.u_frames[tmtr])
             tmtr_panel = output[0][i]
             val_tmtr, pos_tmtr = val_pos(tmtr_panel)
 
-            output = image_to_numpy(self.uframes[tm])
+            output = image_to_numpy(self.u_frames[tm])
             tm_panel = output[0][i]
             val_tm, pos_tm = val_pos(tm_panel)
 
-            output = image_to_numpy(self.uframes[tr])
+            output = image_to_numpy(self.u_frames[tr])
             tr_panel = output[0][i]
             val_tr, pos_tr = val_pos(tr_panel)
 
