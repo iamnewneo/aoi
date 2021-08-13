@@ -7,7 +7,7 @@ from torch import nn
 
 from train_cnn import CNNModel
 
-N_EPOCHS = 10
+N_EPOCHS = 1000
 LR = 0.01
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
