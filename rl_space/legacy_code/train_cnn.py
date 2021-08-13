@@ -79,8 +79,6 @@ class CNNTrainer:
 
             # release the cap object
             vidcap.release()
-            # close all windows
-            cv2.destroyAllWindows()
             with open("./data/u_frames.pkl", "wb") as f:
                 pickle.dump(uframes, f, protocol=pickle.HIGHEST_PROTOCOL)
 
