@@ -1,4 +1,3 @@
-
 import gc
 import time
 import math
@@ -20,7 +19,7 @@ from space_invader_reward_change import SpaceInvaderGame
 torch.set_flush_denormal(True)
 torch.cuda.empty_cache()
 
-TRAINING = False
+TRAINING = True
 
 MEM_CAPACITY = 140000
 LR = 1e-4
