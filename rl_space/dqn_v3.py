@@ -27,7 +27,7 @@ N_EPISODES = 10000
 MAX_STEPS = 50000
 BATCH_SIZE = 128
 GAMMA = 0.999
-TARGET_UPDATE = 100
+TARGET_UPDATE = 10
 PRETRAIN_LENGTH = BATCH_SIZE
 FRAME_SKIP = 4
 
@@ -44,7 +44,7 @@ STACK_SIZE = 4
 MODEL_PATHS = f"./models_fs/reward_change_v2_lr_{LR}_tg_{TARGET_UPDATE}"
 Path(MODEL_PATHS).mkdir(parents=True, exist_ok=True)
 Transition = namedtuple("Transition", ("state", "action", "next_state", "reward"))
-device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 
 
 def q_mem(mem):
@@ -488,4 +488,3 @@ if __name__ == "__main__":
             traceback.print_exc()
     else:
         simulate()
-

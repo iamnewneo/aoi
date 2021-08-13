@@ -1,3 +1,4 @@
+
 import gc
 import time
 import math
@@ -19,7 +20,7 @@ from space_invader_reward_change import SpaceInvaderGame
 torch.set_flush_denormal(True)
 torch.cuda.empty_cache()
 
-TRAINING = True
+TRAINING = False
 
 MEM_CAPACITY = 140000
 LR = 1e-4
@@ -27,7 +28,7 @@ N_EPISODES = 10000
 MAX_STEPS = 50000
 BATCH_SIZE = 128
 GAMMA = 0.999
-TARGET_UPDATE = 100
+TARGET_UPDATE = 25
 PRETRAIN_LENGTH = BATCH_SIZE
 FRAME_SKIP = 4
 
@@ -44,7 +45,7 @@ STACK_SIZE = 4
 MODEL_PATHS = f"./models_fs/reward_change_v2_lr_{LR}_tg_{TARGET_UPDATE}"
 Path(MODEL_PATHS).mkdir(parents=True, exist_ok=True)
 Transition = namedtuple("Transition", ("state", "action", "next_state", "reward"))
-device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
 
 
 def q_mem(mem):
@@ -266,11 +267,14 @@ class SpaceInvaderDQN:
         self.loss_func = nn.MSELoss()
         self.steps_done = 0
 
-    def select_action(self, state):
+    def select_action(self, state, test=False):
         sample = random.random()
         eps_threshold = EPS_END + (EPS_START - EPS_END) * math.exp(
             -1.0 * self.steps_done / EPS_DECAY
         )
+        if test:
+            with torch.no_grad():
+                return self.policy_net(state).max(1)[1].view(1, 1)
         self.steps_done += 1
         if sample > eps_threshold:
             with torch.no_grad():
@@ -444,6 +448,7 @@ def train():
 
 def simulate():
     save_path = f"{MODEL_PATHS}/policy_net_ep_500.pth"
+    print(save_path)
     stacked_frames = deque(
         [torch.zeros((WIDTH, HEIGHT)) for i in range(STACK_SIZE)], maxlen=4,
     )
@@ -462,10 +467,13 @@ def simulate():
     while True:
         if not torch.is_tensor(state):
             state = torch.from_numpy(state).unsqueeze(0).to(device)
-        with torch.no_grad():
-            action = agent.policy_net(state)
-        best_action_max_value, best_action_max_index = torch.max(action, 1)
-        best_action_string = space_game.action_list[best_action_max_index.item()]
+        best_action = agent.select_action(state, test=True)
+        best_action_string = space_game.action_list[best_action.item()]
+        # with torch.no_grad():
+        #     action = agent.policy_net(state)
+        # best_action_max_value, best_action_max_index = torch.max(action, 1)
+        # best_action_string = space_game.action_list[best_action_max_index.item()]
+        print(best_action_string)
         for _ in range(FRAME_SKIP):
             _, done = space_game.step(best_action_string)
             if done:
@@ -488,4 +496,3 @@ if __name__ == "__main__":
             traceback.print_exc()
     else:
         simulate()
-

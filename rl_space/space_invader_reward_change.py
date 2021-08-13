@@ -538,8 +538,8 @@ class SpaceInvaderGame:
                             - self.lasers[i].width / 2
                         )
                         self.lasers[i].y = self.enemies[i].y + self.lasers[i].height / 2
-                        reward += -0.5
-                        done = False
+                        # reward += -0.5
+                        # done = False
             # enemy movement
             self.enemies[i].x += self.enemies[i].dx * float(2 ** (self.difficulty - 1))
             # laser movement
@@ -612,6 +612,9 @@ class SpaceInvaderGame:
 
         # bullet
         if self.bullet.y < 0:
+            # This means bullet was missed
+            reward += -0.5
+            done = False
             self.bullet.fired = False
             self.bullet.x = (
                 self.player.x + self.player.width / 2 - self.bullet.width / 2
@@ -667,7 +670,8 @@ if __name__ == "__main__":
     for _ in range(n_actions):
         action_taken = np.random.choice(space_game.action_list, 1, action_prob)[0]
         # print(f"Action Take: {action_taken}")
-        space_game.step(action_taken)
+        r, d = space_game.step(action_taken)
+        print(f"Action = {action_taken}. Reward: {r}")
         if space_game.life == 0:
             gameover = 1
             break
