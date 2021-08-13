@@ -116,7 +116,7 @@ class CNNTrainer:
         )
         return loader
 
-    def train_cnnn(self):
+    def train_cnn(self):
         model = CNNModel()
         model.to(device=DEVICE)
         data_loader = self.get_dataloader()
@@ -201,7 +201,7 @@ class CNNTrainer:
 
 def main():
     cnn_trainer = CNNTrainer()
-    model = cnn_trainer.train_cnnn()
+    model = cnn_trainer.train_cnn()
     cnn_trainer.post_processing()
 
 
