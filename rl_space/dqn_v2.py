@@ -1,19 +1,19 @@
 import gc
-import time
 import math
-import torch
 import random
+import time
 import traceback
+from collections import deque, namedtuple
+from itertools import count
+from pathlib import Path
+
+import numpy as np
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
-from pathlib import Path
-from itertools import count
 import torch.optim as optim
-from collections import namedtuple
-
-from collections import deque
 from skimage import transform
+
 from space_invader_reward_change import SpaceInvaderGame
 
 torch.set_flush_denormal(True)
@@ -25,7 +25,7 @@ MEM_CAPACITY = 140000
 LR = 1e-4
 N_EPISODES = 10000
 MAX_STEPS = 50000
-BATCH_SIZE = 128
+BATCH_SIZE = 64
 GAMMA = 0.999
 TARGET_UPDATE = 100
 PRETRAIN_LENGTH = BATCH_SIZE
@@ -41,7 +41,7 @@ HEIGHT = 90
 
 STACK_SIZE = 4
 
-MODEL_PATHS = f"./models_fs/reward_change_v2_lr_{LR}_tg_{TARGET_UPDATE}"
+MODEL_PATHS = f"./models_fs/reward_change_v2_adam_lr_{LR}_tg_{TARGET_UPDATE}"
 Path(MODEL_PATHS).mkdir(parents=True, exist_ok=True)
 Transition = namedtuple("Transition", ("state", "action", "next_state", "reward"))
 device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
@@ -261,8 +261,8 @@ class SpaceInvaderDQN:
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.eval()
 
-        # self.optimizer = optim.Adam(self.policy_net.parameters(), lr=LR)
-        self.optimizer = optim.RMSprop(self.policy_net.parameters())
+        self.optimizer = optim.Adam(self.policy_net.parameters(), lr=LR)
+        # self.optimizer = optim.RMSprop(self.policy_net.parameters())
         self.loss_func = nn.MSELoss()
         self.steps_done = 0
 
