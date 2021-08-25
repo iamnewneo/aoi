@@ -22,10 +22,10 @@ torch.cuda.empty_cache()
 TRAINING = True
 
 MEM_CAPACITY = 140000
-LR = 1e-4
+LR = 1e-5
 N_EPISODES = 10000
 MAX_STEPS = 50000
-BATCH_SIZE = 64
+BATCH_SIZE = 256
 GAMMA = 0.999
 TARGET_UPDATE = 25
 PRETRAIN_LENGTH = BATCH_SIZE
@@ -261,8 +261,8 @@ class SpaceInvaderDQN:
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.eval()
 
-        # self.optimizer = optim.Adam(self.policy_net.parameters(), lr=LR)
-        self.optimizer = optim.RMSprop(self.policy_net.parameters())
+        self.optimizer = optim.Adam(self.policy_net.parameters(), lr=LR)
+        # self.optimizer = optim.RMSprop(self.policy_net.parameters())
         self.loss_func = nn.MSELoss()
         self.steps_done = 0
 
