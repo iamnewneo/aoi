@@ -22,7 +22,7 @@ torch.cuda.empty_cache()
 TRAINING = True
 
 MEM_CAPACITY = 140000
-LR = 1e-5
+LR = 1e-3
 N_EPISODES = 10000
 MAX_STEPS = 50000
 BATCH_SIZE = 256
@@ -41,7 +41,7 @@ HEIGHT = 90
 
 STACK_SIZE = 4
 
-MODEL_PATHS = f"./models_fs/reward_change_v2_adam_lr_{LR}_tg_{TARGET_UPDATE}"
+MODEL_PATHS = f"./models_fs/reward_change_v2_rms_lr_{LR}_tg_{TARGET_UPDATE}"
 Path(MODEL_PATHS).mkdir(parents=True, exist_ok=True)
 Transition = namedtuple("Transition", ("state", "action", "next_state", "reward"))
 device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
@@ -261,8 +261,8 @@ class SpaceInvaderDQN:
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.eval()
 
-        self.optimizer = optim.Adam(self.policy_net.parameters(), lr=LR)
-        # self.optimizer = optim.RMSprop(self.policy_net.parameters())
+        # self.optimizer = optim.Adam(self.policy_net.parameters(), lr=LR)
+        self.optimizer = optim.RMSprop(self.policy_net.parameters(), lr=LR)
         self.loss_func = nn.MSELoss()
         self.steps_done = 0
 
