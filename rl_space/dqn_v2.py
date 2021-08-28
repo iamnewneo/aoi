@@ -86,7 +86,7 @@ def q_mem(mem):
 
 def preprocess_frame(frame):
     def rgb2gray(rgb):
-        return np.dot(rgb[..., :3], [0.2989, 0.5870, 0.1140]) / 255
+        return np.dot(rgb[..., :3], [0.2989, 0.5870, 0.1140])
 
     preprocessed_frame = rgb2gray(frame)
     preprocessed_frame = transform.resize(preprocessed_frame, [HEIGHT, WIDTH])
