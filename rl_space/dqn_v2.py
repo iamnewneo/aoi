@@ -23,8 +23,8 @@ TRAINING = True
 
 MEM_CAPACITY = 140000
 LR = 1e-3
-N_EPISODES = 10000
-MAX_STEPS = 50000
+N_EPISODES = 2
+MAX_STEPS = 5
 BATCH_SIZE = 256
 GAMMA = 0.999
 TARGET_UPDATE = 100
@@ -374,6 +374,7 @@ def train():
         episode_start_time = time.time()
         total_episode_reward = 0
         total_episode_loss = 0
+        space_game = SpaceInvaderGame()
         space_game.init_game()
         state = space_game.get_screen()
         state, stacked_frames = stack_frames(stacked_frames, state, True)

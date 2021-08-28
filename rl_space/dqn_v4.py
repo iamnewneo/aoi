@@ -377,6 +377,7 @@ def train():
         episode_start_time = time.time()
         total_episode_reward = 0
         total_episode_loss = 0
+        space_game = SpaceInvaderGame()
         space_game.init_game()
         state = space_game.get_screen()
         state, stacked_frames = stack_frames(stacked_frames, state, True)
