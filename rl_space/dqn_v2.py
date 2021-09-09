@@ -22,12 +22,12 @@ torch.cuda.empty_cache()
 TRAINING = True
 
 MEM_CAPACITY = 140000
-LR = 1e-3
+LR = 2.5 * 1e-3
 N_EPISODES = 10000
 MAX_STEPS = 50000
 BATCH_SIZE = 256
 GAMMA = 0.999
-TARGET_UPDATE = 100
+TARGET_UPDATE = 50
 PRETRAIN_LENGTH = BATCH_SIZE
 FRAME_SKIP = 4
 
@@ -41,7 +41,7 @@ HEIGHT = 90
 
 STACK_SIZE = 4
 
-MODEL_PATHS = f"./models_fs/reward_change_v2_rms_lr_{LR}_tg_{TARGET_UPDATE}"
+MODEL_PATHS = f"./models_fs/fix_ns_reward_change_v2_rms_lr_{LR}_tg_{TARGET_UPDATE}"
 Path(MODEL_PATHS).mkdir(parents=True, exist_ok=True)
 Transition = namedtuple("Transition", ("state", "action", "next_state", "reward"))
 device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
@@ -399,16 +399,16 @@ def train():
 
             reward = torch.tensor([step_reward], device=device)
 
-            if not torch.is_tensor(next_state):
-                next_state = torch.from_numpy(next_state).unsqueeze(0).to(device)
-            next_state = next_state.to(device)
-            next_state = next_state.float()
+            if not done:
+                if not torch.is_tensor(next_state):
+                    next_state = torch.from_numpy(next_state).unsqueeze(0).to(device)
+                next_state = next_state.to(device)
+                next_state = next_state.float()
+            else:
+                next_state = None
             # memory.push(state, best_action, next_state, reward)
             memory.push(
-                state.detach(),
-                best_action.detach(),
-                next_state.detach(),
-                reward.detach(),
+                state, best_action, next_state, reward,
             )
             state = next_state
             opt_start = time.time()
@@ -472,7 +472,11 @@ def simulate():
             if done:
                 break
 
-        next_state = space_game.get_screen()
+        if not done:
+            next_state = space_game.get_screen()
+        else:
+            next_state = None
+
         next_state, stacked_frames = stack_frames(stacked_frames, next_state, False)
 
         state = next_state
