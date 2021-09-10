@@ -362,9 +362,7 @@ def train():
 
         reward = torch.tensor([step_reward], device=device)
         best_action = torch.tensor([[best_action]], device=device)
-        memory.push(
-            state.detach(), best_action.detach(), next_state.detach(), reward.detach()
-        )
+        memory.push(state, best_action, next_state, reward)
         state = next_state
 
     # q_mem(memory)
@@ -433,7 +431,7 @@ def train():
         print(
             f"Episode: {ep_i}. Loss: {total_episode_loss/step:.2f} "
             f"Total Reward: {total_episode_reward}. Total Casualties: {space_game.total_casualties} "
-            f"Total Time: {time.time() - episode_start_time:.2f}"
+            f"Total Steps: {step}. Total Time: {time.time() - episode_start_time:.2f}"
         )
         print(f"Action Distribution: {action_count_dict}")
         if TRAINING and ep_i % 5 == 0:
