@@ -196,15 +196,15 @@ class SpaceInvaderGame:
         screen_np = screen_np.astype(np.int16)
         return screen_np
 
-    def init_background_music(self):
-        if self.difficulty == 1:
-            mixer.quit()
-            mixer.init()
-        if self.difficulty <= 6:
-            mixer.music.load(background_music_paths[self.difficulty - 1])
-        else:
-            mixer.music.load(background_music_paths[5])
-        mixer.music.play(-1)
+    # def init_background_music(self):
+    #     if self.difficulty == 1:
+    #         mixer.quit()
+    #         mixer.init()
+    #     if self.difficulty <= 6:
+    #         mixer.music.load(background_music_paths[self.difficulty - 1])
+    #     else:
+    #         mixer.music.load(background_music_paths[5])
+    #     mixer.music.play(-1)
 
     def respawn(self, enemy_obj):
         enemy_obj.x = random.randint(0, (WIDTH - enemy_obj.width))
@@ -249,10 +249,10 @@ class SpaceInvaderGame:
         window.blit(gameover_sprint, (WIDTH / 2 - 140, HEIGHT / 2 - 32))
         pygame.display.update()
 
-        mixer.music.stop()
+        # mixer.music.stop()
         # self.game_over_sound.play()
         time.sleep(5.0)
-        mixer.quit()
+        # mixer.quit()
 
     def gameover(self):
         if self.score > self.highest_score:
@@ -362,7 +362,7 @@ class SpaceInvaderGame:
         gameover_sprint = font.render("PAUSED", True, (255, 255, 255))
         window.blit(gameover_sprint, (WIDTH / 2 - 80, HEIGHT / 2 - 32))
         pygame.display.update()
-        mixer.music.pause()
+        # mixer.music.pause()
 
     def init_game(self):
         self.life = 1
