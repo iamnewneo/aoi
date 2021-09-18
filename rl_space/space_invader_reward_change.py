@@ -1,12 +1,12 @@
-import pygame
-import random
 import math
-from pygame import mixer
+import os
+import random
 import time
-import numpy as np
 from dataclasses import dataclass
 
-import os
+import numpy as np
+import pygame
+from pygame import mixer
 
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 os.environ["SDL_AUDIODRIVER"] = "dummy"
@@ -148,11 +148,11 @@ class SpaceInvaderGame:
         self.score = 0
         self.highest_score = 0
         self.kills = 0
-        self.init_background_music()
-        self.pause_sound = mixer.Sound("res/sounds/pause.wav")
-        self.level_up_sound = mixer.Sound("res/sounds/1up.wav")
-        self.game_over_sound = mixer.Sound("res/sounds/gameover.wav")
-        self.weapon_annihilation_sound = mixer.Sound("res/sounds/annihilation.wav")
+        # self.init_background_music()
+        # self.pause_sound = mixer.Sound("res/sounds/pause.wav")
+        # self.level_up_sound = mixer.Sound("res/sounds/1up.wav")
+        # self.game_over_sound = mixer.Sound("res/sounds/gameover.wav")
+        # self.weapon_annihilation_sound = mixer.Sound("res/sounds/annihilation.wav")
         self.running = True
         self.pause_state = 0
         self.enemies = []
@@ -215,7 +215,7 @@ class SpaceInvaderGame:
         return enemy_obj
 
     def level_up(self):
-        self.level_up_sound.play()
+        # self.level_up_sound.play()
         self.level += 1
         self.life += 1  # grant a life
         self.difficulty = 1  # reset difficulty
@@ -250,7 +250,7 @@ class SpaceInvaderGame:
         pygame.display.update()
 
         mixer.music.stop()
-        self.game_over_sound.play()
+        # self.game_over_sound.play()
         time.sleep(5.0)
         mixer.quit()
 
@@ -273,7 +273,7 @@ class SpaceInvaderGame:
 
     def kill_enemy(self, player_obj, bullet_obj, enemy_obj):
         bullet_obj.fired = False
-        enemy_obj.kill_sound.play()
+        # enemy_obj.kill_sound.play()
         bullet_obj.x = player_obj.x + player_obj.width / 2 - bullet_obj.width / 2
         bullet_obj.y = player_obj.y + bullet_obj.height / 2
         self.bullet = bullet_obj
@@ -285,7 +285,7 @@ class SpaceInvaderGame:
                 self.life != 0
             ):
                 self.level_up()
-            self.init_background_music()
+            # self.init_background_music()
         # print("Score:", self.score)
         # print("level:", self.level)
         # print("difficulty:", self.difficulty)
@@ -294,7 +294,7 @@ class SpaceInvaderGame:
 
     def kill_player(self, player_obj, enemy_obj, laser_obj):
         laser_obj.beamed = False
-        player_obj.kill_sound.play()
+        # player_obj.kill_sound.play()
         laser_obj.x = enemy_obj.x + enemy_obj.width / 2 - laser_obj.width / 2
         laser_obj.y = enemy_obj.y + laser_obj.height / 2
         self.life -= 1
@@ -348,7 +348,7 @@ class SpaceInvaderGame:
     def destroy_weapons(self, player_obj, bullet_obj, enemy_obj, laser_obj):
         bullet_obj.fired = False
         laser_obj.beamed = False
-        self.weapon_annihilation_sound.play()
+        # self.weapon_annihilation_sound.play()
         bullet_obj.x = player_obj.x + player_obj.width / 2 - bullet_obj.width / 2
         bullet_obj.y = player_obj.y + bullet_obj.height / 2
         laser_obj.x = enemy_obj.x + enemy_obj.width / 2 - laser_obj.width / 2
@@ -356,7 +356,7 @@ class SpaceInvaderGame:
         return bullet_obj, laser_obj
 
     def pause_game(self):
-        self.pause_sound.play()
+        # self.pause_sound.play()
         self.scoreboard()
         font = pygame.font.SysFont("freesansbold", 64)
         gameover_sprint = font.render("PAUSED", True, (255, 255, 255))
@@ -384,7 +384,7 @@ class SpaceInvaderGame:
         self.total_time = 0
         self.available_bullets = 50
         self.total_casualties = 0
-        self.init_background_music()
+        # self.init_background_music()
         # player
         player_img_path = "res/images/spaceship.png"  # 64 x 64 px image
         player_width = 64
@@ -508,7 +508,7 @@ class SpaceInvaderGame:
         ) and not self.bullet.fired:
             self.bullet.fired = True
 
-            self.bullet.fire_sound.play()
+            # self.bullet.fire_sound.play()
             self.bullet.x = (
                 self.player.x + self.player.width / 2 - self.bullet.width / 2
             )
@@ -531,7 +531,7 @@ class SpaceInvaderGame:
                     if random_chance <= (self.lasers[i].shoot_probability * 100):
                         self.total_casualties += 1
                         self.lasers[i].beamed = True
-                        self.lasers[i].beam_sound.play()
+                        # self.lasers[i].beam_sound.play()
                         self.lasers[i].x = (
                             self.enemies[i].x
                             + self.enemies[i].width / 2
