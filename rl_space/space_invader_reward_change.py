@@ -61,7 +61,7 @@ class Player:
         self.dx = dx
         self.dy = dy
         self.kill_sound_path = kill_sound_path
-        self.kill_sound = mixer.Sound(self.kill_sound_path)
+        # self.kill_sound = mixer.Sound(self.kill_sound_path)
 
     def draw(self):
         window.blit(self.img, (self.x, self.y))
@@ -79,7 +79,7 @@ class Enemy:
         self.dx = dx
         self.dy = dy
         self.kill_sound_path = kill_sound_path
-        self.kill_sound = mixer.Sound(self.kill_sound_path)
+        # self.kill_sound = mixer.Sound(self.kill_sound_path)
 
     def draw(self):
         window.blit(self.img, (self.x, self.y))
@@ -98,7 +98,7 @@ class Bullet:
         self.dy = dy
         self.fired = False
         self.fire_sound_path = fire_sound_path
-        self.fire_sound = mixer.Sound(self.fire_sound_path)
+        # self.fire_sound = mixer.Sound(self.fire_sound_path)
 
     def draw(self):
         if self.fired:
@@ -133,7 +133,7 @@ class Laser:
         self.shoot_timer = 0
         self.relaxation_time = relaxation_time
         self.beam_sound_path = beam_sound_path
-        self.beam_sound = mixer.Sound(self.beam_sound_path)
+        # self.beam_sound = mixer.Sound(self.beam_sound_path)
 
     def draw(self):
         if self.beamed:
