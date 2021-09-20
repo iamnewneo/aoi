@@ -1,3 +1,4 @@
+import faulthandler
 import math
 import time
 from collections import deque
@@ -12,6 +13,8 @@ from algos.agents.dqn_agent import DQNAgent
 from algos.models.dqn_cnn import DQNCnn
 from algos.preprocessing.stack_frame import preprocess_frame, stack_frame
 from space_invader_reward_change import SpaceInvaderGame
+
+faulthandler.enable()
 
 device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 
