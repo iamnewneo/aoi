@@ -38,7 +38,7 @@ window_icon = pygame.image.load("res/images/alien.png")
 pygame.display.set_icon(window_icon)
 
 # create background
-background_img = pygame.image.load("res/images/background.jpg")  # 800 x 600 px image
+background_img = pygame.image.load("res/images/bg_black.jpg")  # 800 x 600 px image
 background_music_paths = [
     "res/sounds/Space_Invaders_Music.ogg",
     "res/sounds/Space_Invaders_Music_x2.ogg",
@@ -175,8 +175,8 @@ class SpaceInvaderGame:
             "RIGHT_ARROW_KEY_PRESSED",
             "UP_ARROW_KEY_PRESSED",
             "DO_NOTHING",
-            "LEFT_FIRE",
-            "RIGHT_FIRE",
+            # "LEFT_FIRE",
+            # "RIGHT_FIRE",
         ]
 
     def collision_check(self, object1, object2):
@@ -555,7 +555,7 @@ class SpaceInvaderGame:
                     self.player, self.bullet, self.enemies[i]
                 )
                 self.enemies[i] = new_enemy_obj
-                reward += 0.5
+                reward += 0.2
                 done = False
 
         for i in range(n_lasers):
@@ -613,7 +613,7 @@ class SpaceInvaderGame:
         # bullet
         if self.bullet.y < 0:
             # This means bullet was missed
-            reward += -0.5
+            reward += -0.2
             done = False
             self.bullet.fired = False
             self.bullet.x = (
