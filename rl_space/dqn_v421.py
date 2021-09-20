@@ -107,7 +107,7 @@ def train(n_episodes=1000):
             step_loss = agent.step(state, action, reward, next_state, done)
             if step_loss is not None:
                 total_episode_loss += step_loss
-            state = next_state
+            state = next_state.copy()
             if step % 1000 == 0:
                 print(
                     f"Episode: {i_episode}. Step: {step}. Last Best Action: {action_string}. "

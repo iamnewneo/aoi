@@ -108,7 +108,7 @@ class DQNAgent:
         Q_targets = rewards + (self.gamma * Q_targets_next * (1 - dones))
 
         # Compute loss
-        loss = F.mse_loss(Q_expected, Q_targets)
+        loss = F.smooth_l1_loss(Q_expected, Q_targets)
 
         # Minimize the loss
         self.optimizer.zero_grad()

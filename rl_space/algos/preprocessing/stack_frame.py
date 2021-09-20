@@ -12,8 +12,9 @@ def preprocess_frame(screen, exclude, output):
             output (int): Size of output image
         """
     # TConver image to gray scale
-    screen = np.float32(screen)
+    # screen = np.float32(screen)
     screen = cv2.cvtColor(screen, cv2.COLOR_RGB2GRAY)
+    screen = cv2.resize(screen, (output, output), interpolation=cv2.INTER_AREA)
 
     # Crop screen[Up: Down, Left: right]
     if exclude:
@@ -21,9 +22,6 @@ def preprocess_frame(screen, exclude, output):
 
     # Convert to float, and normalized
     screen = np.ascontiguousarray(screen, dtype=np.float32) / 255
-
-    # Resize image to 84 * 84
-    screen = cv2.resize(screen, (output, output), interpolation=cv2.INTER_AREA)
     return screen
 
 
