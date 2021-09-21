@@ -19,7 +19,7 @@ faulthandler.enable()
 device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 
 TRAINING = True
-MODEL_PATHS = f"./models_fs/modified_dqn_421/"
+MODEL_PATHS = "./models_fs/modified_dqn_421_bug_fix/"
 Path(MODEL_PATHS).mkdir(parents=True, exist_ok=True)
 
 env_dummy = SpaceInvaderGame()
@@ -131,4 +131,44 @@ def train(n_episodes=1000):
     return scores
 
 
-scores = train(N_EPISODES)
+def simulate():
+    sim_agent = DQNAgent(
+        INPUT_SHAPE,
+        ACTION_SIZE,
+        SEED,
+        device,
+        BUFFER_SIZE,
+        BATCH_SIZE,
+        GAMMA,
+        LR,
+        TAU,
+        UPDATE_EVERY,
+        UPDATE_TARGET,
+        DQNCnn,
+    )
+    save_path = f"{MODEL_PATHS}/model_1900.pth"
+    sim_agent.policy_net.load_state_dict(
+        torch.load(save_path, map_location=torch.device("cpu"))
+    )
+    env = SpaceInvaderGame()
+    env.init_game()
+    state = stack_frames(None, env.get_screen(), True)
+
+    # while True:
+    for step in count():
+        action = sim_agent.act(state)
+        action_string = env.action_list[action.item()]
+        for _ in range(FRAME_SKIP):
+            _, done = env.step(action_string)
+        next_state = env.get_screen()
+        next_state = stack_frames(state, next_state, False)
+        state = next_state.copy()
+        print(f"Best Action: {action_string} {done}")
+        if done:
+            break
+
+
+if TRAINING:
+    scores = train(N_EPISODES)
+else:
+    simulate()
