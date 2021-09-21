@@ -120,7 +120,7 @@ def train(n_episodes=1000):
         scores_window.append(score)  # save most recent score
         scores.append(score)  # save most recent score
         print(
-            f"Episode: {i_episode}. Loss: {total_episode_loss/step:.3f} "
+            f"Episode: {i_episode}. Total Reward: {score}. Loss: {total_episode_loss/step:.3f} "
             f"Average Reward: {np.mean(scores_window):.2f}. Total Casualties: {env.total_casualties} "
             f"Total Steps: {step}. Total Time: {time.time() - episode_start_time:.2f}"
         )
