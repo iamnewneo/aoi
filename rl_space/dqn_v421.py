@@ -19,7 +19,7 @@ faulthandler.enable()
 device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 
 TRAINING = True
-MODEL_PATHS = "./models_fs/modified_dqn_421_bug_fix/"
+MODEL_PATHS = "./models_fs/modified_dqn_421_bug_fix_v2/"
 Path(MODEL_PATHS).mkdir(parents=True, exist_ok=True)
 
 env_dummy = SpaceInvaderGame()
@@ -146,7 +146,7 @@ def simulate():
         UPDATE_TARGET,
         DQNCnn,
     )
-    save_path = f"{MODEL_PATHS}/model_1900.pth"
+    save_path = f"{MODEL_PATHS}/policy_net_ep_2000.pth"
     sim_agent.policy_net.load_state_dict(
         torch.load(save_path, map_location=torch.device("cpu"))
     )

@@ -234,7 +234,7 @@ class SpaceInvaderGame:
         gameover_sprint = font.render("LEVEL UP", True, (255, 255, 255))
         window.blit(gameover_sprint, (WIDTH / 2 - 120, HEIGHT / 2 - 32))
         pygame.display.update()
-        self.init_game()
+        # self.init_game()
         time.sleep(1.0)
 
     def rebirth(self, player_obj):
@@ -251,7 +251,7 @@ class SpaceInvaderGame:
 
         # mixer.music.stop()
         # self.game_over_sound.play()
-        time.sleep(5.0)
+        # time.sleep(5.0)
         # mixer.quit()
 
     def gameover(self):
@@ -557,6 +557,10 @@ class SpaceInvaderGame:
                 self.enemies[i] = new_enemy_obj
                 reward += 0.2
                 done = False
+                if self.level == 3:
+                    reward += 2.0
+                    done = True
+                    return reward, done
 
         for i in range(n_lasers):
             laser_player_collision = self.collision_check(self.lasers[i], self.player)
@@ -615,7 +619,7 @@ class SpaceInvaderGame:
         # bullet
         if self.bullet.y < 0:
             # This means bullet was missed
-            reward += -0.2
+            reward += -0.3
             done = False
             self.bullet.fired = False
             self.bullet.x = (
