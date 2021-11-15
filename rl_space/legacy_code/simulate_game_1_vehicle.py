@@ -787,7 +787,7 @@ while running:
     for laser in lasers:
         laser.draw()
     bullet.draw()
-    player.draw()
+    # player.draw()
 
     # render the display
     returned_co_ordinates = get_spaceship_position(pygame.surfarray.array3d(window))
