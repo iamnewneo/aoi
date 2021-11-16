@@ -13,13 +13,12 @@ from torch.utils.data import DataLoader, Dataset, TensorDataset
 from tqdm import tqdm
 
 BATCH_SIZE = 32
-# N_EPOCHS = 200
-N_EPOCHS = 2
+N_EPOCHS = 20
+# N_EPOCHS = 2
 LR = 1e-5
 SAMPLES = 20000
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-WIDTH = 800
-HEIGHT = 600
+
 RESIZE_WIDTH = 100
 RESIZE_HEIGHT = 100
 
@@ -32,18 +31,6 @@ def h_score(fx, gy):
     covg = torch.matmul(gy.t(), gy) / Nsamples
     h = -2 * torch.mean((fx * gy).sum(1)) + (covf * covg).sum()
     return h
-
-
-def get_value_and_scaled_pos(arr):
-    if torch.is_tensor(arr):
-        arr = arr.numpy()
-    position = np.unravel_index(np.argmax(arr), arr.shape)
-    scaled_pos = (
-        position[0] * (HEIGHT // 18),
-        position[1] * (WIDTH // 18),
-    )
-
-    return scaled_pos
 
 
 class CNNModel(nn.Module):
@@ -179,7 +166,7 @@ class NNDataset(Dataset):
         if image_label:
             image_label = 1
         else:
-            image_label = 0
+            image_label = 2
         enemy_x = row["enemy_x"]
         enemy_y = row["enemy_y"]
         # Swap because screen x and array x is interchanged: axis vs row
@@ -218,6 +205,7 @@ class NNLabel(nn.Module):
 class NNLabelTrainer:
     def __init__(self) -> None:
         self.model = NNLabel()
+        self.model.to(DEVICE)
         self.hscore_model = CNNModel()
         self.hscore_model.load_state_dict(
             torch.load("./models/cnn_model.pth", map_location=torch.device(DEVICE))
@@ -251,7 +239,8 @@ class NNLabelTrainer:
             cnn_channels = channels[0]
             for idx, image_channels in enumerate(cnn_channels):
                 dummy_labels = torch.zeros((18, 18))
-                dummy_labels[enemy_x[idx]][enemy_y[idx]] = label[idx]
+                # dummy_labels[enemy_x[idx]][enemy_y[idx]] = label[idx]
+                dummy_labels[enemy_x[idx]][enemy_y[idx]] = 1
                 temp_image_channels = []
                 temp_image_labels = []
                 for i in range(18):
