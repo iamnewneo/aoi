@@ -1,6 +1,7 @@
 import os
 import pickle
 import time
+from collections import Counter
 
 import cv2
 import matplotlib.pyplot as plt
@@ -12,7 +13,7 @@ from torch import nn
 from torch.utils.data import DataLoader, Dataset, TensorDataset
 from tqdm import tqdm
 
-BATCH_SIZE = 32
+BATCH_SIZE = 8
 # N_EPOCHS = 5
 N_EPOCHS = 20
 LR = 1e-5
@@ -265,7 +266,8 @@ class NNLabelTrainer:
 
             inp_images_tensor = torch.stack(inp_images)
             inp_labels_tensor = torch.stack(inp_labels)
-
+        counter = Counter(inp_labels_tensor.tolist())
+        print(f"Input Distribution: {counter}")
         return inp_images_tensor, inp_labels_tensor
 
     def fit(self, model, dataloader):
@@ -274,7 +276,9 @@ class NNLabelTrainer:
         train_running_correct = 0
         total_training_examples = 0
         for i, data in tqdm(
-            enumerate(dataloader), total=int(self.data_len / dataloader.batch_size)
+            enumerate(dataloader),
+            total=int(self.data_len / dataloader.batch_size),
+            disable=True,
         ):
             images, targets = self.preprocess_data(data)
             images = images.to(DEVICE)
@@ -286,6 +290,8 @@ class NNLabelTrainer:
             loss = self.criterion(outputs, targets)
             train_running_loss += loss.item()
             _, preds = torch.max(outputs.data, 1)
+            counter = Counter(preds.tolist())
+            print(f"Output Distribution: {counter}")
             train_running_correct += (preds == targets).sum().item()
             loss.backward()
             self.optimizer.step()
@@ -387,17 +393,20 @@ class TestPipeline:
             cv2.imwrite(f"./data/output_images/{ids[idx]}.jpg", test_actual_image)
 
     def test_label(self):
-        nn_trainer = NNLabelTrainer()
-        dataset = NNDataset("./data/test.csv")
-        dataloader = DataLoader(dataset=dataset, batch_size=BATCH_SIZE, shuffle=True)
-        for _, data in tqdm(enumerate(dataloader)):
-            images, targets = nn_trainer.preprocess_data(data)
-            images = images.to(DEVICE)
-            targets = targets.to(DEVICE)
-            outputs = self.label_model(images)
-            _, preds = torch.max(outputs.data, 1)
-            # print(preds.shape)
-            self.visualize_test(preds, data)
+        with torch.no_grad():
+            nn_trainer = NNLabelTrainer()
+            dataset = NNDataset("./data/test.csv")
+            dataloader = DataLoader(
+                dataset=dataset, batch_size=BATCH_SIZE, shuffle=True
+            )
+            for _, data in tqdm(enumerate(dataloader)):
+                images, targets = nn_trainer.preprocess_data(data)
+                images = images.to(DEVICE)
+                targets = targets.to(DEVICE)
+                outputs = self.label_model(images)
+                _, preds = torch.max(outputs.data, 1)
+                # print(preds.shape)
+                self.visualize_test(preds, data)
 
 
 def main():
