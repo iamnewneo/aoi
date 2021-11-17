@@ -15,7 +15,7 @@ from tqdm import tqdm
 
 BATCH_SIZE = 8
 # N_EPOCHS = 5
-N_EPOCHS = 40
+N_EPOCHS = 100
 LR = 1e-5
 SAMPLES = 20000
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -271,7 +271,37 @@ class NNLabelTrainer:
             inp_labels_tensor = torch.stack(inp_labels)
         # counter = Counter(inp_labels_tensor.tolist())
         # print(f"Input Distribution: {counter}")
-        return inp_images_tensor, inp_labels_tensor
+        non_zero_mask = inp_labels_tensor > 0
+        zero_mask = inp_labels_tensor == 0
+
+        non_zero_images = inp_images_tensor[non_zero_mask]
+        non_zero_labels = inp_labels_tensor[non_zero_mask]
+
+        zero_images = inp_images_tensor[zero_mask]
+        zero_labels = inp_labels_tensor[zero_mask]
+
+        non_zero_size = non_zero_mask.sum().item()
+        zero_subset_size = non_zero_size * 10
+        zero_subset_indexes = np.random.choice(
+            zero_images.shape[0], zero_subset_size, replace=False
+        )
+
+        zero_images = zero_images[zero_subset_indexes]
+        zero_labels = zero_labels[zero_subset_indexes]
+
+        combined_images_tensor = torch.cat([non_zero_images, zero_images])
+        combined_labels_tensor = torch.cat([non_zero_labels, zero_labels])
+
+        shuffling_indexes = np.random.choice(
+            combined_images_tensor.shape[0],
+            combined_images_tensor.shape[0],
+            replace=False,
+        )
+
+        combined_images_tensor = combined_images_tensor[shuffling_indexes]
+        combined_labels_tensor = combined_labels_tensor[shuffling_indexes]
+
+        return combined_images_tensor, combined_labels_tensor
 
     def fit(self, model, dataloader):
         model.train()
