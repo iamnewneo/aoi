@@ -450,8 +450,8 @@ class TestPipeline:
 
 
 def main():
-    # nn_trainer = NNLabelTrainer()
-    # nn_trainer.train()
+    nn_trainer = NNLabelTrainer()
+    nn_trainer.train()
 
     test_pipeline = TestPipeline()
     test_pipeline.test_label()
