@@ -15,7 +15,7 @@ from tqdm import tqdm
 
 BATCH_SIZE = 8
 # N_EPOCHS = 5
-N_EPOCHS = 100
+N_EPOCHS = 200
 LR = 1e-5
 SAMPLES = 20000
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
