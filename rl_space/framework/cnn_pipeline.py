@@ -352,6 +352,8 @@ class NNLabelTrainer:
             train_accuracy.append(train_epoch_accuracy)
             # val_loss.append(val_epoch_loss)
             # val_accuracy.append(val_epoch_accuracy)
+            if epoch % 5 == 0:
+                torch.save(self.model.state_dict(), f"./models/label_model_{epoch}.pth")
         end = time.time()
         print(f"{(end-start)/60:.3f} minutes")
 
