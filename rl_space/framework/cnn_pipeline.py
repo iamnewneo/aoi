@@ -201,14 +201,17 @@ class NNDataset(Dataset):
 class NNLabel(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear(16, 8)
-        self.fc2 = nn.Linear(8, N_LABELS)
+        self.fc1 = nn.Linear(16, 32)
+        self.fc2 = nn.Linear(32, 32)
+        self.fc3 = nn.Linear(32, 16)
+        self.fc4 = nn.Linear(16, N_LABELS)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         out = self.fc1(x)
-        out = self.sigmoid(out)
-        out = self.fc2(out)
+        out = F.relu(self.fc2(out))
+        out = F.relu(self.fc3(out))
+        out = self.fc4(out)
         out = F.softmax(out, dim=1)
         return out
 
@@ -228,7 +231,7 @@ class NNLabelTrainer:
             dataset=self.dataset, batch_size=BATCH_SIZE, shuffle=True
         )
         self.data_len = len(self.dataset)
-        self.optimizer = torch.optim.Adam(self.hscore_model.parameters(), lr=LR)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=LR)
         self.criterion = nn.CrossEntropyLoss()
 
     def preprocess_data(self, data):
@@ -290,9 +293,12 @@ class NNLabelTrainer:
             loss = self.criterion(outputs, targets)
             train_running_loss += loss.item()
             _, preds = torch.max(outputs.data, 1)
+            batch_correct = (preds == targets).sum().item()
+            train_running_correct += batch_correct
             # counter = Counter(preds.tolist())
-            # print(f"Output Distribution: {counter}")
-            train_running_correct += (preds == targets).sum().item()
+            # print(
+            #     f"Output Distribution: {counter}. Batch Accuracy: {batch_correct*100/targets.shape[0]}"
+            # )
             loss.backward()
             self.optimizer.step()
         train_loss = train_running_loss / self.data_len
