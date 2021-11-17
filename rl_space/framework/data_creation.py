@@ -696,6 +696,8 @@ def create_dataset():
         # Save every 100 frames
         if counter % 100 == 0:
             space_game.save_dataset()
+        if counter % 1000 == 0:
+            print(f"Counter: {counter}/{n_actions}")
         counter += 1
     print(f"Total Counter: {counter}")
 
