@@ -188,6 +188,7 @@ class SpaceInvaderGame:
             "RIGHT_FIRE",
         ]
         self.dataset = []
+        self.game_finish = False
 
     def collision_check(self, object1, object2):
         x1_cm = object1.x + object1.width / 2
@@ -265,6 +266,7 @@ class SpaceInvaderGame:
         mixer.quit()
 
     def gameover(self):
+        self.game_finish = True
         if self.score > self.highest_score:
             self.highest_score = self.score
 
@@ -680,14 +682,14 @@ def create_dataset():
     n_actions = 500000
     space_game = SpaceInvaderGame()
     space_game.init_game()
-    action_prob = [0.17, 0.23, 0.02, 0.58]
+    action_prob = [0.17, 0.13, 0.005, 0.695]
 
     counter = 0
     while counter < n_actions:
         action_taken = np.random.choice(space_game.action_list, 1, action_prob)[0]
         # print(f"Action Take: {action_taken}")
         space_game.step(action_taken)
-        if space_game.life == 0:
+        if space_game.life == 0 or space_game.game_finish:
             space_game = SpaceInvaderGame()
             space_game.init_game()
         # Take snap every 10 frames
