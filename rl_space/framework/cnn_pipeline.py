@@ -15,7 +15,7 @@ from tqdm import tqdm
 
 BATCH_SIZE = 8
 # N_EPOCHS = 5
-N_EPOCHS = 20
+N_EPOCHS = 1000
 LR = 1e-5
 SAMPLES = 20000
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -138,8 +138,7 @@ class CNNTrainer:
         model = CNNModel()
         model.to(device=DEVICE)
         data_loader = self.get_dataloader()
-        optimizer = torch.optim.SGD(model.parameters(), lr=LR)
-        optimizer = torch.optim.Adam(model.parameters(), lr=LR, weight_decay=1e-4)
+        optimizer = torch.optim.Adam(model.parameters(), lr=LR)
 
         print("Training Model")
         for epoch in range(N_EPOCHS):
