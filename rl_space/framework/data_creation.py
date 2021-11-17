@@ -677,7 +677,7 @@ class SpaceInvaderGame:
 
 
 def create_dataset():
-    n_actions = 100000
+    n_actions = 500000
     space_game = SpaceInvaderGame()
     space_game.init_game()
     action_prob = [0.17, 0.23, 0.02, 0.58]
@@ -690,7 +690,6 @@ def create_dataset():
         if space_game.life == 0:
             space_game = SpaceInvaderGame()
             space_game.init_game()
-            break
         # Take snap every 10 frames
         if counter % 10 == 0:
             space_game.snap_data()
