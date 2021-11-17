@@ -266,8 +266,8 @@ class NNLabelTrainer:
 
             inp_images_tensor = torch.stack(inp_images)
             inp_labels_tensor = torch.stack(inp_labels)
-        counter = Counter(inp_labels_tensor.tolist())
-        print(f"Input Distribution: {counter}")
+        # counter = Counter(inp_labels_tensor.tolist())
+        # print(f"Input Distribution: {counter}")
         return inp_images_tensor, inp_labels_tensor
 
     def fit(self, model, dataloader):
