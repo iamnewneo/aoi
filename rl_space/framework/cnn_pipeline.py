@@ -363,11 +363,13 @@ class TestPipeline:
         self.cnn_model.load_state_dict(
             torch.load("./models/cnn_model.pth", map_location=torch.device(DEVICE))
         )
+        self.cnn_model.to(DEVICE)
         self.cnn_model.eval()
         self.label_model = NNLabel()
         self.label_model.load_state_dict(
             torch.load("./models/label_model.pth", map_location=torch.device(DEVICE))
         )
+        self.label_model.to(DEVICE)
         self.label_model.eval()
 
     def visualize_test(self, preds, data):
