@@ -217,6 +217,7 @@ class NNLabelTrainer:
     def __init__(self) -> None:
         self.model = NNLabel()
         self.model.to(DEVICE)
+        self.model.train()
         self.hscore_model = CNNModel()
         self.hscore_model.load_state_dict(
             torch.load("./models/cnn_model.pth", map_location=torch.device(DEVICE))
