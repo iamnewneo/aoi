@@ -13,14 +13,23 @@ from torch.utils.data import DataLoader, Dataset, TensorDataset
 from tqdm import tqdm
 
 BATCH_SIZE = 32
+# N_EPOCHS = 5
 N_EPOCHS = 20
-# N_EPOCHS = 2
 LR = 1e-5
 SAMPLES = 20000
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 RESIZE_WIDTH = 100
 RESIZE_HEIGHT = 100
+N_LABELS = 3  # 1. Moving, 2. Reloading, 3. Nothing
+
+
+def reverse_x_y(x, y):
+    x = (x * 100) // 18
+    x = x * 6
+    y = (y * 100) // 18
+    y = y * 6
+    return x, y
 
 
 def h_score(fx, gy):
@@ -147,10 +156,13 @@ class CNNTrainer:
 
 
 class NNDataset(Dataset):
-    def __init__(self, transform=None) -> None:
+    def __init__(self, csv_path, transform=None) -> None:
         super().__init__()
-        self.df = pd.read_csv("./data/train.csv")
-        self.df = self.df.set_index("index")
+        df = pd.read_csv(csv_path)
+        df["id"] = df["index"]
+        df = df.set_index("index")
+        df["label"] = df["enemy_reloading"].apply(lambda x: 1 if x else 2)
+        self.df = df
         self.transform = transform
 
     def __len__(self):
@@ -162,11 +174,8 @@ class NNDataset(Dataset):
 
         row = self.df.iloc[idx]
         image_path = row["img_path"]
-        image_label = row["enemy_reloading"]  # reloading true
-        if image_label:
-            image_label = 1
-        else:
-            image_label = 2
+        image_label = row["label"]  # reloading true
+        # image_encoded_label = row["encoded_label"]
         enemy_x = row["enemy_x"]
         enemy_y = row["enemy_y"]
         # Swap because screen x and array x is interchanged: axis vs row
@@ -180,6 +189,8 @@ class NNDataset(Dataset):
             "enemy_x": enemy_x,
             "enemy_y": enemy_y,
             "label": image_label,
+            "id": row["id"],
+            # "encoded_label": image_encoded_label,
         }
         if self.transform:
             sample = self.transform(sample)
@@ -191,14 +202,14 @@ class NNLabel(nn.Module):
     def __init__(self):
         super().__init__()
         self.fc1 = nn.Linear(16, 8)
-        self.fc2 = nn.Linear(8, 2)
+        self.fc2 = nn.Linear(8, N_LABELS)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         out = self.fc1(x)
         out = self.sigmoid(out)
         out = self.fc2(out)
-        out = F.softmax(out)
+        out = F.softmax(out, dim=1)
         return out
 
 
@@ -211,7 +222,7 @@ class NNLabelTrainer:
             torch.load("./models/cnn_model.pth", map_location=torch.device(DEVICE))
         )
         self.hscore_model.eval()
-        self.dataset = NNDataset()
+        self.dataset = NNDataset("./data/train.csv")
         self.dataloader = DataLoader(
             dataset=self.dataset, batch_size=BATCH_SIZE, shuffle=True
         )
@@ -239,14 +250,13 @@ class NNLabelTrainer:
             cnn_channels = channels[0]
             for idx, image_channels in enumerate(cnn_channels):
                 dummy_labels = torch.zeros((18, 18))
-                # dummy_labels[enemy_x[idx]][enemy_y[idx]] = label[idx]
-                dummy_labels[enemy_x[idx]][enemy_y[idx]] = 1
+                dummy_labels[enemy_x[idx]][enemy_y[idx]] = label[idx]
                 temp_image_channels = []
                 temp_image_labels = []
                 for i in range(18):
                     for j in range(18):
                         temp_image_channels.append(image_channels[:, i, j])
-                        temp_image_labels.append(dummy_labels[i][j])
+                        temp_image_labels.append(dummy_labels[i][j].long())
 
                 inp_images += temp_image_channels
                 inp_labels += temp_image_labels
@@ -323,7 +333,7 @@ class NNLabelTrainer:
 
         # save the model to disk
         print("Saving model...")
-        torch.save(self.model.state_dict(), "../models/label_model.pth")
+        torch.save(self.model.state_dict(), "./models/label_model.pth")
 
 
 class TrainPipeline:
@@ -335,6 +345,68 @@ class TrainPipeline:
         nn_label_trainer = NNLabelTrainer()
 
 
-if __name__ == "__main__":
+class TestPipeline:
+    def __init__(self) -> None:
+        self.cnn_model = CNNModel()
+        self.cnn_model.load_state_dict(
+            torch.load("./models/cnn_model.pth", map_location=torch.device(DEVICE))
+        )
+        self.cnn_model.eval()
+        self.label_model = NNLabel()
+        self.label_model.load_state_dict(
+            torch.load("./models/label_model.pth", map_location=torch.device(DEVICE))
+        )
+        self.label_model.eval()
+
+    def visualize_test(self, preds, data):
+        offset = 18 * 18
+        n_unique_images = preds.shape[0] // offset
+        ids = data["id"]
+        for idx in range(n_unique_images):
+            test_actual_image = cv2.imread(f"./data/test_images/{ids[idx]}.jpg")
+            image = preds[idx * offset : (idx + 1) * offset]
+            image = image.reshape(18, 18)
+            for i in range(18):
+                for j in range(18):
+                    label = image[i][j]
+                    if label > 0:
+                        # print(f"Image: {idx} Label: {label}. Location: {i},{j}")
+                        x, y = reverse_x_y(i, j)
+                        if label == 1:
+                            # BGR
+                            color = (0, 0, 255)
+                        else:
+                            color = (255, 0, 0)
+                        test_actual_image = cv2.circle(
+                            test_actual_image,
+                            (y, x),
+                            radius=5,
+                            color=color,
+                            thickness=-1,
+                        )
+            cv2.imwrite(f"./data/output_images/{ids[idx]}.jpg", test_actual_image)
+
+    def test_label(self):
+        nn_trainer = NNLabelTrainer()
+        dataset = NNDataset("./data/test.csv")
+        dataloader = DataLoader(dataset=dataset, batch_size=BATCH_SIZE, shuffle=True)
+        for _, data in tqdm(enumerate(dataloader)):
+            images, targets = nn_trainer.preprocess_data(data)
+            images = images.to(DEVICE)
+            targets = targets.to(DEVICE)
+            outputs = self.label_model(images)
+            _, preds = torch.max(outputs.data, 1)
+            # print(preds.shape)
+            self.visualize_test(preds, data)
+
+
+def main():
     nn_trainer = NNLabelTrainer()
     nn_trainer.train()
+
+    test_pipeline = TestPipeline()
+    test_pipeline.test_label()
+
+
+if __name__ == "__main__":
+    main()
