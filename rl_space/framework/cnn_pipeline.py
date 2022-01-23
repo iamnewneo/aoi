@@ -234,7 +234,23 @@ class NNLabelTrainer:
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=LR)
         self.criterion = nn.CrossEntropyLoss()
 
-    def preprocess_data(self, data):
+    def preprocess_frame(self, frame):
+        inp_images = []
+        # check if frame is tensor
+        with torch.no_grad():
+            self.hscore_model.eval()
+            channels = self.hscore_model(frame)
+            cnn_channels = channels[0]
+            for idx, image_channels in enumerate(cnn_channels):
+                temp_image_channels = []
+                for i in range(18):
+                    for j in range(18):
+                        temp_image_channels.append(image_channels[:, i, j])
+                inp_images += temp_image_channels
+            inp_images_tensor = torch.stack(inp_images)
+        return inp_images_tensor
+
+    def preprocess_data(self, data, test=False):
         images = data["image"]
         # Adjusting Resize 600->100
         enemy_x = data["enemy_x"] // 6
@@ -301,6 +317,8 @@ class NNLabelTrainer:
         combined_images_tensor = combined_images_tensor[shuffling_indexes]
         combined_labels_tensor = combined_labels_tensor[shuffling_indexes]
 
+        if test:
+            return inp_images_tensor, inp_labels_tensor
         return combined_images_tensor, combined_labels_tensor
 
     def fit(self, model, dataloader):
@@ -399,7 +417,9 @@ class TestPipeline:
         self.cnn_model.eval()
         self.label_model = NNLabel()
         self.label_model.load_state_dict(
-            torch.load("./models/label_model.pth", map_location=torch.device(DEVICE))
+            torch.load(
+                "./models/label_model_150.pth", map_location=torch.device(DEVICE)
+            )
         )
         self.label_model.to(DEVICE)
         self.label_model.eval()
@@ -440,18 +460,17 @@ class TestPipeline:
                 dataset=dataset, batch_size=BATCH_SIZE, shuffle=True
             )
             for _, data in tqdm(enumerate(dataloader)):
-                images, targets = nn_trainer.preprocess_data(data)
+                images, targets = nn_trainer.preprocess_data(data, test=True)
                 images = images.to(DEVICE)
                 targets = targets.to(DEVICE)
                 outputs = self.label_model(images)
                 _, preds = torch.max(outputs.data, 1)
-                # print(preds.shape)
                 self.visualize_test(preds, data)
 
 
 def main():
-    nn_trainer = NNLabelTrainer()
-    nn_trainer.train()
+    # nn_trainer = NNLabelTrainer()
+    # nn_trainer.train()
 
     test_pipeline = TestPipeline()
     test_pipeline.test_label()

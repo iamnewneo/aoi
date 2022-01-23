@@ -11,8 +11,8 @@ import pygame
 from PIL import Image
 from pygame import mixer
 
-os.environ["SDL_VIDEODRIVER"] = "dummy"
-os.environ["SDL_AUDIODRIVER"] = "dummy"
+# os.environ["SDL_VIDEODRIVER"] = "dummy"
+# os.environ["SDL_AUDIODRIVER"] = "dummy"
 
 
 # game constants
@@ -21,10 +21,6 @@ HEIGHT = 600
 
 # initialize pygame
 pygame.init()
-
-
-def fire_prob(p=1):
-    return random.random() < p
 
 
 @dataclass
@@ -45,11 +41,7 @@ window_icon = pygame.image.load("res/images/alien.png")
 pygame.display.set_icon(window_icon)
 
 # create background
-background_img = pygame.image.load("res/images/background.jpg")
-if fire_prob(1):
-    background_img = pygame.image.load(
-        "res/images/background_noise.jpg"
-    )  # 800 x 600 px image
+background_img = pygame.image.load("res/images/background.jpg")  # 800 x 600 px image
 background_music_paths = [
     "res/sounds/Space_Invaders_Music.ogg",
     "res/sounds/Space_Invaders_Music_x2.ogg",
@@ -58,13 +50,6 @@ background_music_paths = [
     "res/sounds/Space_Invaders_Music_x16.ogg",
     "res/sounds/Space_Invaders_Music_x32.ogg",
 ]
-
-
-def spread_all_over(img):
-    for _ in range(100):
-        x_random = random.randint(0, WIDTH)
-        y_random = random.randint(0, HEIGHT)
-        window.blit(img, (x_random, y_random))
 
 
 # create player class
@@ -129,8 +114,6 @@ class Bullet:
     def draw(self):
         if self.fired:
             window.blit(self.img, (self.x, self.y))
-            if fire_prob(0.1):
-                spread_all_over(self.img)
 
 
 # create laser class
@@ -166,8 +149,6 @@ class Laser:
     def draw(self):
         if self.beamed:
             window.blit(self.img, (self.x, self.y))
-            if fire_prob(0.1):
-                spread_all_over(self.img)
 
 
 class SpaceInvaderGame:
@@ -273,6 +254,7 @@ class SpaceInvaderGame:
         return player_obj
 
     def gameover_screen(self):
+        self.game_finish = False
         self.scoreboard()
         font = pygame.font.SysFont("freesansbold", 64)
         gameover_sprint = font.render("GAME OVER", True, (255, 255, 255))
@@ -285,7 +267,6 @@ class SpaceInvaderGame:
         mixer.quit()
 
     def gameover(self):
-        self.game_finish = True
         if self.score > self.highest_score:
             self.highest_score = self.score
 
@@ -458,10 +439,6 @@ class SpaceInvaderGame:
         # enemy (number of enemy = level number)
         enemy_img_path = "res/images/enemy.png"  # 64 x 64 px image
         enemy_reloading_img_path = "res/images/enemy_reloading.jpg"
-        # if fire_prob(1):
-        #     enemy_img_path = "res/images/enemy_noise.png"  # 64 x 64 px image
-        # if fire_prob(0.1):
-        #     enemy_reloading_img_path = "res/images/enemy_noise.png"  # 64 x 64 px image
         enemy_width = 64
         enemy_height = 64
         enemy_dx = self.initial_enemy_velocity
@@ -516,6 +493,13 @@ class SpaceInvaderGame:
                 laser_beam_sound_path,
             )
             self.lasers.append(laser_obj)
+
+    def mark_enemy_position(self, enemy):
+        if enemy["label"] == 1:
+            pygame.draw.circle(window, (0, 255, 0), [enemy["y"], enemy["x"]], 5, 5)
+        else:
+            pygame.draw.circle(window, (255, 0, 0), [enemy["y"], enemy["x"]], 5, 5)
+        pygame.display.update()
 
     def step(self, action):
         reward = 0
@@ -652,6 +636,7 @@ class SpaceInvaderGame:
         for laser in self.lasers:
             laser.draw()
         for enemy in self.enemies:
+            # enemy.reloading = False
             enemy.draw()
         self.bullet.draw()
         self.player.draw()
@@ -683,8 +668,8 @@ class SpaceInvaderGame:
             self.dataset.append((enemy_x, enemy_y, enemy_reloading, screen))
 
     def save_dataset(self):
-        dataset_file = "./data/train_noise.csv"
-        dataset_images = "./data/train_images_v2"
+        dataset_file = "./data/train.csv"
+        dataset_images = "./data/train_images"
         df = pd.DataFrame(
             self.dataset, columns=["enemy_x", "enemy_y", "enemy_reloading", "screen"]
         )
