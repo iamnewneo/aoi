@@ -176,7 +176,7 @@ class SpaceInvaderGame:
         self.max_kills_to_difficulty_up = 5
         self.max_difficulty_to_level_up = 5
         self.initial_player_velocity = 3.0
-        self.initial_enemy_velocity = 1.0
+        self.initial_enemy_velocity = 2.0
         self.weapon_shot_velocity = 5.0
         self.total_time = 0
         self.action_list = [
