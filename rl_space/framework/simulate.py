@@ -1,3 +1,4 @@
+import time
 from collections import defaultdict
 
 import cv2
@@ -12,13 +13,17 @@ from cnn_pipeline import CNNModel, NNLabel, NNLabelTrainer, reverse_x_y
 from space_invader import Action, SpaceInvaderGame
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 RESIZE_WIDTH = 100
 RESIZE_HEIGHT = 100
 
-SHOOT_X_DELTA = 2
+SHOOT_X_DELTA = 1
 
 plt.ion()
+
+
+# RUNTIME_ENV = "BASIC"
+RUNTIME_ENV = "NOISY"
+N_STEPS_UNIT = 100
 
 # Label 2: Moving. Label 1: Relaoding
 class MetricTracker:
@@ -215,21 +220,70 @@ class SimulateGame:
         enemy_positions = self.get_enemy_positions(preds)
         for enemy_pos in enemy_positions:
             self.game.mark_enemy_position(enemy_pos)
-
         metric_tracker.calculate_metrics(enemy_positions)
         action = self.get_action(enemy_positions)
         return action
 
     def simulate(self):
-        self.game.init_game()
-        metric_tracker = MetricTracker(self.game)
-        for _ in range(100000):
-            screen = self.game.get_screen()
-            frame_tensor = self.preprocess_input(screen)
-            action = self.get_best_action(frame_tensor, metric_tracker)
-            self.game.step(action)
+        if RUNTIME_ENV == "BASIC":
+            self.game.init_game()
+            metric_tracker = MetricTracker(self.game)
+            for _ in range(N_STEPS_UNIT * 10):
+                screen = self.game.get_screen()
+                frame_tensor = self.preprocess_input(screen)
+                action = self.get_best_action(frame_tensor, metric_tracker)
+                self.game.step(action)
 
-            metric_tracker.visualize_metrics()
+        elif RUNTIME_ENV == "NOISY":
+            self.game.init_game()
+            metric_tracker = MetricTracker(self.game)
+            for _ in range(N_STEPS_UNIT):
+                screen = self.game.get_screen()
+                frame_tensor = self.preprocess_input(screen)
+                action = Action.UP_ARROW_KEY_PRESSED
+                action = self.get_best_action(frame_tensor, metric_tracker)
+                self.game.step(action)
+            # Adding 3 enemies
+            self.game.init_game(
+                args={
+                    "level": 3,
+                    "background_img_path": "res/images/background_noise.jpg",
+                }
+            )
+            for _ in range(N_STEPS_UNIT):
+                screen = self.game.get_screen()
+                frame_tensor = self.preprocess_input(screen)
+                action = Action.UP_ARROW_KEY_PRESSED
+                action = self.get_best_action(frame_tensor, metric_tracker)
+                self.game.step(action)
+
+            # Changing Background
+            self.game.init_game(
+                args={
+                    "level": 3,
+                    "background_img_path": "res/images/background_noise.jpg",
+                }
+            )
+            for _ in range(N_STEPS_UNIT):
+                screen = self.game.get_screen()
+                frame_tensor = self.preprocess_input(screen)
+                action = Action.UP_ARROW_KEY_PRESSED
+                action = self.get_best_action(frame_tensor, metric_tracker)
+                self.game.step(action)
+
+            # Changing Background and Adding Enemies
+            self.game.init_game(
+                args={
+                    "level": 5,
+                    "background_img_path": "res/images/background_noise.jpg",
+                }
+            )
+            for _ in range(N_STEPS_UNIT):
+                screen = self.game.get_screen()
+                frame_tensor = self.preprocess_input(screen)
+                action = Action.UP_ARROW_KEY_PRESSED
+                action = self.get_best_action(frame_tensor, metric_tracker)
+                self.game.step(action)
 
 
 def main():
