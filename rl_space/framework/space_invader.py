@@ -41,7 +41,7 @@ window_icon = pygame.image.load("res/images/alien.png")
 pygame.display.set_icon(window_icon)
 
 # create background
-background_img = pygame.image.load("res/images/background.jpg")  # 800 x 600 px image
+# background_img = pygame.image.load("res/images/background.jpg")  # 800 x 600 px image
 background_music_paths = [
     "res/sounds/Space_Invaders_Music.ogg",
     "res/sounds/Space_Invaders_Music_x2.ogg",
@@ -64,7 +64,7 @@ class Player:
         self.dx = dx
         self.dy = dy
         self.kill_sound_path = kill_sound_path
-        self.kill_sound = mixer.Sound(self.kill_sound_path)
+        # self.kill_sound = mixer.Sound(self.kill_sound_path)
 
     def draw(self):
         window.blit(self.img, (self.x, self.y))
@@ -83,8 +83,8 @@ class Enemy:
         self.y = y
         self.dx = dx
         self.dy = dy
-        self.kill_sound_path = kill_sound_path
-        self.kill_sound = mixer.Sound(self.kill_sound_path)
+        # self.kill_sound_path = kill_sound_path
+        # self.kill_sound = mixer.Sound(self.kill_sound_path)
         self.reloading = False
         self.img_reloading_path = img_reloading_path
         self.img_reloadig = pygame.image.load(self.img_reloading_path)
@@ -226,7 +226,7 @@ class SpaceInvaderGame:
         return enemy_obj
 
     def level_up(self):
-        self.level_up_sound.play()
+        # self.level_up_sound.play()
         self.level += 1
         self.life += 1  # grant a life
         self.difficulty = 1  # reset difficulty
@@ -262,7 +262,7 @@ class SpaceInvaderGame:
         pygame.display.update()
 
         mixer.music.stop()
-        self.game_over_sound.play()
+        # self.game_over_sound.play()
         time.sleep(5.0)
         mixer.quit()
 
@@ -285,7 +285,7 @@ class SpaceInvaderGame:
 
     def kill_enemy(self, player_obj, bullet_obj, enemy_obj):
         bullet_obj.fired = False
-        enemy_obj.kill_sound.play()
+        # enemy_obj.kill_sound.play()
         bullet_obj.x = player_obj.x + player_obj.width / 2 - bullet_obj.width / 2
         bullet_obj.y = player_obj.y + bullet_obj.height / 2
         self.bullet = bullet_obj
@@ -297,7 +297,7 @@ class SpaceInvaderGame:
                 self.life != 0
             ):
                 self.level_up()
-            self.init_background_music()
+            # self.init_background_music()
         # print("Score:", self.score)
         # print("level:", self.level)
         # print("difficulty:", self.difficulty)
@@ -306,7 +306,7 @@ class SpaceInvaderGame:
 
     def kill_player(self, player_obj, enemy_obj, laser_obj):
         laser_obj.beamed = False
-        player_obj.kill_sound.play()
+        # player_obj.kill_sound.play()
         laser_obj.x = enemy_obj.x + enemy_obj.width / 2 - laser_obj.width / 2
         laser_obj.y = enemy_obj.y + laser_obj.height / 2
         self.life -= 1
@@ -360,7 +360,7 @@ class SpaceInvaderGame:
     def destroy_weapons(self, player_obj, bullet_obj, enemy_obj, laser_obj):
         bullet_obj.fired = False
         laser_obj.beamed = False
-        self.weapon_annihilation_sound.play()
+        # self.weapon_annihilation_sound.play()
         bullet_obj.x = player_obj.x + player_obj.width / 2 - bullet_obj.width / 2
         bullet_obj.y = player_obj.y + bullet_obj.height / 2
         laser_obj.x = enemy_obj.x + enemy_obj.width / 2 - laser_obj.width / 2
@@ -368,17 +368,18 @@ class SpaceInvaderGame:
         return bullet_obj, laser_obj
 
     def pause_game(self):
-        self.pause_sound.play()
+        # self.pause_sound.play()
         self.scoreboard()
         font = pygame.font.SysFont("freesansbold", 64)
         gameover_sprint = font.render("PAUSED", True, (255, 255, 255))
         window.blit(gameover_sprint, (WIDTH / 2 - 80, HEIGHT / 2 - 32))
         pygame.display.update()
-        mixer.music.pause()
+        # mixer.music.pause()
 
-    def init_game(self):
+    def init_game(self, args=None):
         self.life = 1
         self.level = 2
+        self.background_img_path = "res/images/background.jpg"
         self.difficulty = 1
         self.score = 0
         self.highest_score = 0
@@ -395,6 +396,14 @@ class SpaceInvaderGame:
         self.weapon_shot_velocity = 5.0
         self.total_time = 0
         self.init_background_music()
+        if args is not None:
+            for k, v in args.items():
+                if k == "level":
+                    self.level = v
+                elif k == "background_img_path":
+                    self.background_img_path = v
+        self.background_img = pygame.image.load(self.background_img_path)
+
         # player
         player_img_path = "res/images/spaceship.png"  # 64 x 64 px image
         player_width = 64
@@ -505,7 +514,7 @@ class SpaceInvaderGame:
         reward = 0
         start_time = time.time()
         window.fill((0, 0, 0))
-        window.blit(background_img, (0, 0))
+        window.blit(self.background_img, (0, 0))
         if action == Action.RIGHT_ARROW_KEY_PRESSED or action == Action.RIGHT_FIRE:
             self.player.x += self.player.dx
         if action == Action.LEFT_ARROW_KEY_PRESSED or action == Action.LEFT_FIRE:
@@ -517,7 +526,7 @@ class SpaceInvaderGame:
             or action == Action.RIGHT_FIRE
         ) and not self.bullet.fired:
             self.bullet.fired = True
-            self.bullet.fire_sound.play()
+            # self.bullet.fire_sound.play()
             self.bullet.x = (
                 self.player.x + self.player.width / 2 - self.bullet.width / 2
             )
@@ -538,7 +547,7 @@ class SpaceInvaderGame:
                     random_chance = random.randint(0, 100)
                     if random_chance <= (self.lasers[i].shoot_probability * 100):
                         self.lasers[i].beamed = True
-                        self.lasers[i].beam_sound.play()
+                        # self.lasers[i].beam_sound.play()
                         self.lasers[i].x = (
                             self.enemies[i].x
                             + self.enemies[i].width / 2
@@ -562,14 +571,14 @@ class SpaceInvaderGame:
                 self.enemies[i] = new_enemy_obj
                 reward = 1
 
-        for i in range(n_lasers):
-            laser_player_collision = self.collision_check(self.lasers[i], self.player)
-            if laser_player_collision:
-                new_laser = self.kill_player(
-                    self.player, self.enemies[i], self.lasers[i]
-                )
-                self.lasers[i] = new_laser
-                reward = -1
+        # for i in range(n_lasers):
+        # laser_player_collision = self.collision_check(self.lasers[i], self.player)
+        # if laser_player_collision:
+        #     new_laser = self.kill_player(
+        #         self.player, self.enemies[i], self.lasers[i]
+        #     )
+        #     self.lasers[i] = new_laser
+        #     reward = -1
 
         for i in range(n_enemies):
             enemy_player_collision = self.collision_check(self.enemies[i], self.player)
@@ -632,7 +641,7 @@ class SpaceInvaderGame:
                 self.lasers[i].y = self.enemies[i].y + self.lasers[i].height / 2
 
         # create frame by placing objects on the surface
-        self.scoreboard()
+        # self.scoreboard()
         for laser in self.lasers:
             laser.draw()
         for enemy in self.enemies:
