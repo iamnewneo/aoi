@@ -642,13 +642,13 @@ class SpaceInvaderGame:
 
         # create frame by placing objects on the surface
         # self.scoreboard()
-        for laser in self.lasers:
-            laser.draw()
+        # for laser in self.lasers:
+        #     laser.draw()
         for enemy in self.enemies:
             # enemy.reloading = False
             enemy.draw()
-        self.bullet.draw()
-        self.player.draw()
+        # self.bullet.draw()
+        # self.player.draw()
 
         # render the display
         pygame.display.update()

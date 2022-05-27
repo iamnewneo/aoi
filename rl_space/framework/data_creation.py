@@ -24,7 +24,8 @@ pygame.init()
 
 
 def fire_prob(p=1):
-    return random.random() < p
+    # return random.random() < p
+    return False
 
 
 @dataclass
@@ -46,10 +47,10 @@ pygame.display.set_icon(window_icon)
 
 # create background
 background_img = pygame.image.load("res/images/background.jpg")
-if fire_prob(1):
-    background_img = pygame.image.load(
-        "res/images/background_noise.jpg"
-    )  # 800 x 600 px image
+# if fire_prob(1):
+#     background_img = pygame.image.load(
+#         "res/images/background_noise.jpg"
+#     )  # 800 x 600 px image
 background_music_paths = [
     "res/sounds/Space_Invaders_Music.ogg",
     "res/sounds/Space_Invaders_Music_x2.ogg",
@@ -173,7 +174,7 @@ class Laser:
 class SpaceInvaderGame:
     def __init__(self) -> None:
         self.life = 1
-        self.level = 1
+        self.level = 2
         self.difficulty = 1
         self.score = 0
         self.highest_score = 0
@@ -648,13 +649,13 @@ class SpaceInvaderGame:
                 self.lasers[i].y = self.enemies[i].y + self.lasers[i].height / 2
 
         # create frame by placing objects on the surface
-        self.scoreboard()
+        # self.scoreboard()
         for laser in self.lasers:
             laser.draw()
         for enemy in self.enemies:
             enemy.draw()
-        self.bullet.draw()
-        self.player.draw()
+        # self.bullet.draw()
+        # self.player.draw()
 
         # render the display
         pygame.display.update()
@@ -683,8 +684,8 @@ class SpaceInvaderGame:
             self.dataset.append((enemy_x, enemy_y, enemy_reloading, screen))
 
     def save_dataset(self):
-        dataset_file = "./data/train_noise.csv"
-        dataset_images = "./data/train_images_v2"
+        dataset_file = "./data/train_noise_v3.csv"
+        dataset_images = "./data/train_images_v3"
         df = pd.DataFrame(
             self.dataset, columns=["enemy_x", "enemy_y", "enemy_reloading", "screen"]
         )
